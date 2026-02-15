@@ -82,6 +82,12 @@
   Fill them out with the right functional requirements.
 -->
 
+<!--
+  NOTE: Translate constitution constraints into explicit FRs when applicable
+  (schema-before-proof, deterministic failures, no proofBytes logging,
+  result-object validation errors, registry immutability, breaking-change docs).
+-->
+
 ### Functional Requirements
 
 - **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]

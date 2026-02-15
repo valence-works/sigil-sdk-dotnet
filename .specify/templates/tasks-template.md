@@ -18,6 +18,15 @@ description: "Task list template for feature implementation"
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
 - Include exact file paths in descriptions
 
+## Constitution Checks (when applicable)
+
+- Add tasks that enforce schema validation before proof verification.
+- Add tasks for deterministic failure on unknown `proofSystem`/`statementId`.
+- Add tasks to prevent logging or emitting `proofBytes` in diagnostics.
+- Add tasks that return result objects for validation failures (no throws).
+- Add tasks to configure registries via DI and keep them immutable.
+- Add tasks to document breaking changes with ADR/spec updates.
+
 ## Path Conventions
 
 - **Single project**: `src/`, `tests/` at repository root

@@ -1,50 +1,70 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+- Version change: N/A (template) -> 0.1.0
+- Modified principles: N/A (template placeholders)
+- Added sections: Core Principles; Additional Constraints; Development Workflow
+- Removed sections: None
+- Templates requiring updates:
+	- ✅ .specify/templates/plan-template.md
+	- ✅ .specify/templates/spec-template.md
+	- ✅ .specify/templates/tasks-template.md
+	- ⚠️ .specify/templates/commands/*.md (directory not present)
+- Follow-up TODOs:
+	- TODO(RATIFICATION_DATE): original ratification date not found in repo
+-->
+# Sigil SDK (.NET) Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Spec-Driven, Deterministic Validation
+All validation MUST be driven by published specs and schemas. Schema validation
+MUST run before proof verification. Unknown `proofSystem` or `statementId` MUST
+fail deterministically. Validation logic MUST be deterministic and side-effect
+free and MUST avoid platform-specific dependencies in core validation paths.
+Rationale: deterministic, spec-anchored behavior ensures offline verification is
+reliable and auditable across environments.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Result-Based Validation Errors
+Validation failures MUST return a result object that reports errors without
+throwing. Exceptions are reserved for programmer errors (e.g., null arguments or
+misconfiguration), not for invalid inputs or failed checks. Rationale: consumers
+need predictable, non-throwing validation APIs for offline license enforcement.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Proof Confidentiality
+`proofBytes` MUST never be logged, traced, or emitted in diagnostics. Redact or
+omit proof material from all logs and error messages. Rationale: proof material
+is sensitive and must not leak through observability channels.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Immutable, DI-Configured Registries
+Proof-system and statement registries MUST be provided via dependency injection
+and MUST be immutable after construction. Runtime mutation is prohibited.
+Rationale: immutability prevents nondeterministic validation behavior.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Controlled Breaking Changes
+Breaking changes require an ADR or spec update with explicit versioning notes
+and a migration plan. No breaking change is permitted without documentation.
+Rationale: SDK consumers need stable contracts and predictable upgrades.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Additional Constraints
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+- Core validation MUST be offline-capable and MUST NOT perform network calls.
+- Validation outputs MUST be deterministic for identical inputs.
+- Schema and verification order is non-negotiable: schema first, proof second.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Development Workflow
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- Production code MUST NOT be introduced without a corresponding spec in
+	`/specs`.
+- Plans and specs MUST include a constitution check and list any violations.
+- PR reviews MUST confirm compliance with all Core Principles.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+- Amendments require a PR that updates this constitution and documents the
+	rationale in an ADR or spec where applicable.
+- Versioning uses semantic versioning: MAJOR for breaking governance changes,
+	MINOR for new principles or material expansions, PATCH for clarifications.
+- Compliance is reviewed in plans, specs, and code reviews before merge.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 0.1.0 | **Ratified**: TODO(RATIFICATION_DATE): original adoption
+date not found | **Last Amended**: 2026-02-15

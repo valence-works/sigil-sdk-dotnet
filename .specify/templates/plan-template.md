@@ -33,6 +33,13 @@
 
 [Gates determined based on constitution file]
 
+- Schema validation MUST run before proof verification.
+- Unknown `proofSystem` or `statementId` MUST fail deterministically.
+- Validation failures MUST return a result object (no throws).
+- `proofBytes` MUST NOT be logged or emitted in diagnostics.
+- Registries MUST be DI-configured and immutable after construction.
+- Breaking changes require an ADR/spec with explicit versioning notes.
+
 ## Project Structure
 
 ### Documentation (this feature)
