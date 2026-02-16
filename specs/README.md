@@ -101,3 +101,9 @@ Sigil SDK must:
 - Be deterministic.
 - Remain proof-system agnostic.
 - Avoid coupling transport structure to semantic meaning.
+
+---
+
+## Specs Index
+
+- **Spec 001**: Proof Envelope Format (v1.0) — `specs/001-proof-envelope-format/`

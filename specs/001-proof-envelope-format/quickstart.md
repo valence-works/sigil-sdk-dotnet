@@ -45,5 +45,6 @@ This guide shows the minimal JSON required to produce a valid Proof Envelope For
 
 - Validation is offline-only and fail-closed.
 - Unknown top-level fields are ignored; unknown `publicInputs` fields are rejected.
+- Unknown `proofSystem` or `statementId` must fail deterministically with a stable failure category.
 - `expiresAt` is compared against current UTC time; expired envelopes fail with `Expired`.
 - `proofBytes` must never be logged or emitted in diagnostics.

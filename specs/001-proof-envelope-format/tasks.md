@@ -22,10 +22,10 @@ description: "Task list for Proof Envelope Format"
 
 **Purpose**: Documentation scaffolding
 
-- [ ] T001 [US1] Create contracts directory at specs/001-proof-envelope-format/contracts/ (supports FR-001 to FR-005)
-- [ ] T002 [US1] Draft research notes in specs/001-proof-envelope-format/research.md (supports FR-001a to FR-007)
-- [ ] T003 [US1] Draft data model outline in specs/001-proof-envelope-format/data-model.md (supports FR-001 to FR-010)
-- [ ] T004 [US1] Draft quickstart outline in specs/001-proof-envelope-format/quickstart.md (supports FR-011 to FR-015)
+- [x] T001 [US1] Create contracts directory at specs/001-proof-envelope-format/contracts/ (supports FR-001 to FR-005)
+- [x] T002 [US1] Draft research notes in specs/001-proof-envelope-format/research.md (supports FR-001a to FR-007)
+- [x] T003 [US1] Draft data model outline in specs/001-proof-envelope-format/data-model.md (supports FR-001 to FR-010)
+- [x] T004 [US1] Draft quickstart outline in specs/001-proof-envelope-format/quickstart.md (supports FR-011 to FR-015)
 
 ---
 
@@ -33,10 +33,10 @@ description: "Task list for Proof Envelope Format"
 
 **Purpose**: Align spec requirements with planned artifacts
 
-- [ ] T005 Align functional requirements with planned contract fields in specs/001-proof-envelope-format/spec.md
-- [ ] T006 Document offline-only and fail-closed constraints in specs/001-proof-envelope-format/quickstart.md
-- [ ] T007 Document deterministic failure handling for unknown identifiers in specs/001-proof-envelope-format/quickstart.md
-- [ ] T008 Document proofBytes non-logging policy in specs/001-proof-envelope-format/quickstart.md
+- [x] T005 Align functional requirements with planned contract fields in specs/001-proof-envelope-format/spec.md
+- [x] T006 Document offline-only and fail-closed constraints in specs/001-proof-envelope-format/quickstart.md
+- [x] T007 Document deterministic failure handling for unknown identifiers in specs/001-proof-envelope-format/quickstart.md
+- [x] T008 Document proofBytes non-logging policy in specs/001-proof-envelope-format/quickstart.md
 
 ---
 
@@ -48,9 +48,9 @@ description: "Task list for Proof Envelope Format"
 
 ### Implementation for User Story 1
 
-- [ ] T009 [P] [US1] Define top-level envelope schema fields in specs/001-proof-envelope-format/contracts/proof-envelope.schema.json
-- [ ] T010 [US1] Document ProofEnvelope fields and rules in specs/001-proof-envelope-format/data-model.md
-- [ ] T011 [US1] Add minimal and full envelope examples in specs/001-proof-envelope-format/quickstart.md
+- [x] T009 [P] [US1] Define top-level envelope schema fields in specs/001-proof-envelope-format/contracts/proof-envelope.schema.json
+- [x] T010 [US1] Document ProofEnvelope fields and rules in specs/001-proof-envelope-format/data-model.md
+- [x] T011 [US1] Add minimal and full envelope examples in specs/001-proof-envelope-format/quickstart.md
 
 **Checkpoint**: User Story 1 documentation and schema are sufficient to validate a minimal envelope.
 
@@ -64,9 +64,9 @@ description: "Task list for Proof Envelope Format"
 
 ### Implementation for User Story 2
 
-- [ ] T012 [P] [US2] Enforce strict publicInputs schema (required fields, no extras) in specs/001-proof-envelope-format/contracts/proof-envelope.schema.json
-- [ ] T013 [US2] Document publicInputs validation rules in specs/001-proof-envelope-format/data-model.md
-- [ ] T014 [US2] Add strict publicInputs validation notes in specs/001-proof-envelope-format/quickstart.md
+- [x] T012 [P] [US2] Enforce strict publicInputs schema (required fields, no extras) in specs/001-proof-envelope-format/contracts/proof-envelope.schema.json
+- [x] T013 [US2] Document publicInputs validation rules in specs/001-proof-envelope-format/data-model.md
+- [x] T014 [US2] Add strict publicInputs validation notes in specs/001-proof-envelope-format/quickstart.md
 
 **Checkpoint**: User Story 2 documentation reflects strict publicInputs validation for v1.
 
@@ -80,8 +80,8 @@ description: "Task list for Proof Envelope Format"
 
 ### Implementation for User Story 3
 
-- [ ] T015 [P] [US3] Ensure top-level forward compatibility in specs/001-proof-envelope-format/contracts/proof-envelope.schema.json
-- [ ] T016 [US3] Add forward-compatibility guidance in specs/001-proof-envelope-format/quickstart.md
+- [x] T015 [P] [US3] Ensure top-level forward compatibility in specs/001-proof-envelope-format/contracts/proof-envelope.schema.json
+- [x] T016 [US3] Add forward-compatibility guidance in specs/001-proof-envelope-format/quickstart.md
 
 **Checkpoint**: User Story 3 guidance clarifies how unknown top-level fields are handled.
 
@@ -91,9 +91,10 @@ description: "Task list for Proof Envelope Format"
 
 **Purpose**: Documentation consistency and discoverability
 
-- [ ] T017 [P] [US1] Add spec index entry in specs/README.md (supports discoverability for all stories)
-- [ ] T018 Update quickstart validation notes for expiry handling in specs/001-proof-envelope-format/quickstart.md
-- [ ] T019 Update agent context via .specify/scripts/bash/update-agent-context.sh copilot
+- [x] T017 [P] [US1] Add spec index entry in specs/README.md (supports discoverability for all stories)
+- [x] T018 Update quickstart validation notes for expiry handling in specs/001-proof-envelope-format/quickstart.md
+- [x] T019 Update agent context via .specify/scripts/bash/update-agent-context.sh copilot
+
 
 ---
 

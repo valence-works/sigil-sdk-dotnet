@@ -22,6 +22,7 @@ tests/
 C# / .NET 8 (planned SDK target; repository currently empty): Follow standard conventions
 
 ## Recent Changes
+- 001-proof-envelope-format: Added C# / .NET 8 (planned SDK target; repository currently empty) + System.Text.Json; JSON Schema validator (e.g., JsonSchema.Net)
 
 - 001-proof-envelope-format: Added C# / .NET 8 (planned SDK target; repository currently empty) + System.Text.Json; JSON Schema validator (e.g., JsonSchema.Net)
 
