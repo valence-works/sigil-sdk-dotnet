@@ -11,12 +11,6 @@ Deliver an offline, deterministic Proof Envelope validation API for Sigil SDK th
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
 **Language/Version**: C# / .NET 8 (planned SDK target)  
 **Primary Dependencies**: System.Text.Json; Microsoft.Extensions.DependencyInjection; Microsoft.Extensions.Logging; Corvus.Json.Validator (Draft 2020-12 JSON Schema)  
 **Storage**: N/A  
@@ -56,20 +50,13 @@ specs/002-sdk-validation-api/
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
-
 ```text
 src/
 
 tests/
 ```
 
-**Structure Decision**: Documentation and contracts are produced in `specs/002-sdk-validation-api/`. Source directories exist but are not modified by this plan.
+**Structure Decision**: Documentation and contracts are produced in `specs/002-sdk-validation-api/`. Implementation work will add/update code under `src/` and `tests/` as described in `tasks.md`.
 
 ## Phase 0: Research
 
