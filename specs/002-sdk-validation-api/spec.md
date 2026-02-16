@@ -1,9 +1,9 @@
 # Feature Specification: SDK Validation API
 
 **Feature Branch**: `002-sdk-validation-api`  
-**Created**: 2026-02-15  
+**Created**: 2026-02-16  
 **Status**: Draft  
-**Input**: User description: "Create a feature specification for SDK Validation API for Sigil SDK. Validation must return deterministic result objects (no exceptions for validation failures), include LicenseStatus + failure codes, validate schema before proof verification, resolve proofSystem and statementId via DI registries (immutable), evaluate expiresAt and fail with Expired when expired, compile schema once at startup, provide ValidateAsync(string) and ValidateAsync(Stream), and enforce logging/diagnostics policy (never log proofBytes; diagnostics opt-in)."
+**Input**: User description: "Create a feature specification for SDK Validation API for Sigil SDK. The API must validate Proof Envelopes defined in Spec 001. Requirements: Result-object API (no exceptions for validation failures); LicenseStatus enum with Valid, Invalid, Expired, Unsupported, Malformed, Error; deterministic failure codes; validate JSON schema before cryptographic verification; extract proofSystem and statementId early and enforce DI-based immutable registries; evaluate expiresAt and return Expired when appropriate; compile JSON schema once at startup; provide ValidateAsync(string) and ValidateAsync(Stream); structured logging policy (never log proofBytes; diagnostics opt-in only); fail closed. Include measurable success criteria and acceptance scenarios."
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -89,17 +89,26 @@ As an integrator, I want proof system and statement resolution to use immutable 
 
 ### Functional Requirements
 
-- **FR-001**: Validation MUST return deterministic result objects for all inputs and MUST NOT throw exceptions for validation failures.
-- **FR-002**: Each validation result MUST include a `LicenseStatus` and zero or more failure codes.
-- **FR-003**: Validation MUST perform schema validation before any proof verification.
-- **FR-004**: Validation MUST resolve `proofSystem` and `statementId` via immutable registries provided at startup.
-- **FR-005**: Unknown `proofSystem` or `statementId` MUST fail deterministically with a stable failure code.
-- **FR-006**: When `expiresAt` is present and in the past, validation MUST return `Expired` as the failure code.
-- **FR-007**: The schema MUST be compiled once at startup and reused for all validations.
-- **FR-008**: The API MUST provide `ValidateAsync(string)` and `ValidateAsync(Stream)` entry points.
-- **FR-009**: Validation MUST be offline and MUST NOT require network calls.
-- **FR-010**: Logging and diagnostics MUST never emit `proofBytes` content.
-- **FR-011**: Diagnostics MUST be opt-in and disabled by default.
+- **FR-001**: The SDK MUST validate Proof Envelopes that conform to Spec 001 (Proof Envelope Format v1.0).
+- **FR-002**: The validation API MUST be result-object based; normal validation failures MUST NOT be surfaced as exceptions to the caller.
+- **FR-003**: The SDK MUST expose a `LicenseStatus` model with exactly these values: `Valid`, `Invalid`, `Expired`, `Unsupported`, `Malformed`, `Error`.
+- **FR-004**: Each validation result MUST include a `LicenseStatus` and, when not `Valid`, a deterministic failure code suitable for policy and telemetry.
+- **FR-005**: Validation MUST validate the envelope against the Spec 001 JSON schema before performing any cryptographic verification.
+- **FR-006**: Validation MUST extract `proofSystem` and `statementId` as early as practical (before registry resolution and before cryptographic verification) to support deterministic routing and diagnostics.
+- **FR-007**: Validation MUST enforce immutable, dependency-injection-provided registries for statement handlers and proof system verifiers; registry contents MUST NOT change at runtime.
+- **FR-008**: Validation MUST evaluate `publicInputs.expiresAt` (Spec 001) and return status `Expired` when `expiresAt` is present and earlier than current UTC time.
+- **FR-009**: Validation MUST compile/initialize the Spec 001 JSON schema once at process startup (or equivalent application start) and reuse it for subsequent validations.
+- **FR-010**: The SDK MUST provide two asynchronous validation entry points: `ValidateAsync(string)` and `ValidateAsync(Stream)`.
+- **FR-011**: The SDK MUST implement a structured logging policy where `proofBytes` are never logged; additional diagnostics MUST be opt-in.
+- **FR-012**: The SDK MUST fail closed: it MUST NOT return `Valid` unless all required validation steps succeed, and any unhandled/unexpected condition MUST return a non-`Valid` result.
+
+#### Failure Model Requirements
+
+- **FR-013**: The SDK MUST provide a stable set of failure codes that map deterministically to exactly one `LicenseStatus`.
+- **FR-014**: `Malformed` MUST be used for JSON parsing failures, schema validation failures, and required-field/type violations.
+- **FR-015**: `Unsupported` MUST be used when the envelope’s `envelopeVersion`, `proofSystem`, or `statementId` are syntactically valid but not supported/registered.
+- **FR-016**: `Invalid` MUST be used when schema is valid and the envelope is supported, but cryptographic verification fails or required semantic checks fail.
+- **FR-017**: `Error` MUST be used for unexpected internal failures (e.g., exceptions, IO read errors) and MUST still return a deterministic failure code.
 
 ### Key Entities *(include if feature involves data)*
 
