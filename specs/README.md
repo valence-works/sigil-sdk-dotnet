@@ -107,3 +107,4 @@ Sigil SDK must:
 ## Specs Index
 
 - **Spec 001**: Proof Envelope Format (v1.0) — `specs/001-proof-envelope-format/`
+- **Spec 002**: SDK Validation API — `specs/002-sdk-validation-api/`
