@@ -53,6 +53,7 @@ Registry requirements:
 - Immutable after construction.
 - No runtime mutation.
 - Resolution is deterministic.
+- Duplicate entries are misconfiguration and must fail fast at startup.
 
 ## Validation State Machine (conceptual)
 

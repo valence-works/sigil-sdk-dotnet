@@ -106,6 +106,7 @@ This feature must comply with the Sigil SDK constitution in `.specify/memory/con
 - **FR-005**: Validation MUST validate the envelope against the Spec 001 JSON schema before performing any cryptographic verification. Identifier extraction and envelopeVersion support checks MAY occur prior to full schema validation to enable deterministic routing and failure classification.
 - **FR-006**: Validation MUST extract `proofSystem` and `statementId` as early as practical (before registry resolution and before cryptographic verification) to support deterministic routing and diagnostics.
 - **FR-007**: Validation MUST enforce immutable, dependency-injection-provided registries for statement handlers and proof system verifiers; registry contents MUST NOT change at runtime.
+- **FR-007a**: Duplicate registry entries detected at startup MUST be treated as misconfiguration and MUST fail fast with a deterministic exception.
 - **FR-008**: Validation MUST evaluate `publicInputs.expiresAt` (Spec 001) only after successful cryptographic verification / verified claim extraction.
 - **FR-008a**: If cryptographic verification fails, validation MUST return status `Invalid` and MUST NOT return status `Expired`.
 - **FR-008b**: If cryptographic verification succeeds and `expiresAt` is present and earlier than the current UTC time (as provided by the configured clock abstraction), validation MUST return status `Expired`.
@@ -147,6 +148,10 @@ This feature must comply with the Sigil SDK constitution in `.specify/memory/con
 - Q: Should null inputs throw or return a failure result? → A: Throw `ArgumentNullException` for null inputs (programmer error).
 - Q: How should `ValidateAsync(Stream)` handle stream read failures? → A: Return status `Error` with a deterministic failure code.
 - Q: Should `ValidateAsync` accept cancellation? → A: Yes, both overloads accept an optional `CancellationToken`.
+
+### Session 2026-02-17
+
+- Q: How should duplicate registry entries at startup be handled? → A: Treat as misconfiguration; fail fast with a deterministic exception.
 
 ## Success Criteria *(mandatory)*
 
