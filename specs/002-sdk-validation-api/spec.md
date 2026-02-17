@@ -31,7 +31,7 @@ As an integrator, I want a validation API that returns deterministic results so 
 **Acceptance Scenarios**:
 
 1. **Given** an invalid envelope, **When** validation runs, **Then** a deterministic result object is returned and no exception is raised for validation failure.
-2. **Given** a valid envelope, **When** validation runs, **Then** the result object indicates success and includes the corresponding `LicenseStatus`.
+2. **Given** a valid envelope, **When** validation runs, **Then** the result object indicates success and includes typed claims derived from verified `publicInputs`.
 
 ---
 
@@ -103,16 +103,16 @@ This feature must comply with the Sigil SDK constitution in `.specify/memory/con
 - **FR-003**: The SDK MUST expose a `LicenseStatus` model with exactly these values: `Valid`, `Invalid`, `Expired`, `Unsupported`, `Malformed`, `Error`.
 - **FR-004**: Each validation result MUST include a `LicenseStatus` and, when not `Valid`, a deterministic failure code suitable for policy and telemetry.
 - **FR-004a**: When `LicenseStatus` is not `Valid`, the result MUST include exactly one failure code (not a list).
-- **FR-005**: Validation MUST validate the envelope against the Spec 001 JSON schema before performing any cryptographic verification.
+- **FR-005**: Validation MUST validate the envelope against the Spec 001 JSON schema before performing any cryptographic verification. Identifier extraction and envelopeVersion support checks MAY occur prior to full schema validation to enable deterministic routing and failure classification.
 - **FR-006**: Validation MUST extract `proofSystem` and `statementId` as early as practical (before registry resolution and before cryptographic verification) to support deterministic routing and diagnostics.
 - **FR-007**: Validation MUST enforce immutable, dependency-injection-provided registries for statement handlers and proof system verifiers; registry contents MUST NOT change at runtime.
 - **FR-008**: Validation MUST evaluate `publicInputs.expiresAt` (Spec 001) only after successful cryptographic verification / verified claim extraction.
 - **FR-008a**: If cryptographic verification fails, validation MUST return status `Invalid` and MUST NOT return status `Expired`.
-- **FR-008b**: If cryptographic verification succeeds and `expiresAt` is present and earlier than current UTC time, validation MUST return status `Expired`.
+- **FR-008b**: If cryptographic verification succeeds and `expiresAt` is present and earlier than the current UTC time (as provided by the configured clock abstraction), validation MUST return status `Expired`.
 - **FR-009**: Validation MUST compile/initialize the Spec 001 JSON schema once at process startup (or equivalent application start) and reuse it for subsequent validations.
 - **FR-010**: The SDK MUST provide two asynchronous validation entry points: `ValidateAsync(string)` and `ValidateAsync(Stream)`.
 - **FR-010a**: Both `ValidateAsync` overloads MUST accept an optional `CancellationToken`.
-- **FR-011**: The SDK MUST implement a structured logging policy where `proofBytes` are never logged; additional diagnostics MUST be opt-in.
+- **FR-011**: The SDK MUST implement a structured logging policy where `proofBytes` are never logged at any log level and are never included in exception messages; additional diagnostics MUST be explicitly enabled via configuration.
 - **FR-012**: The SDK MUST fail closed: it MUST NOT return `Valid` unless all required validation steps succeed, and any unhandled/unexpected condition MUST return a non-`Valid` result.
 
 #### Failure Model Requirements
@@ -122,7 +122,7 @@ This feature must comply with the Sigil SDK constitution in `.specify/memory/con
 - **FR-014**: `Malformed` MUST be used for JSON parsing failures, schema validation failures, and required-field/type violations.
 - **FR-015**: `Unsupported` MUST be used when the envelope’s `envelopeVersion`, `proofSystem`, or `statementId` are syntactically valid but not supported/registered.
 - **FR-016**: `Invalid` MUST be used when schema is valid and the envelope is supported, but cryptographic verification fails or required semantic checks fail.
-- **FR-017**: `Error` MUST be used for unexpected internal failures (e.g., exceptions, IO read errors) and MUST still return a deterministic failure code.
+- **FR-017**: `Error` MUST NOT be used for expected validation failures covered by other failure codes.
 - **FR-017a**: If `ValidateAsync(Stream)` fails to read the input stream (IO errors, truncation, disposal during read), validation MUST return status `Error` with a deterministic failure code.
 
 ### Key Entities *(include if feature involves data)*
