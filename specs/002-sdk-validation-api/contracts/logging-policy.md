@@ -19,6 +19,8 @@ When available and safe, logs MAY include:
 - `ProofSystem`
 - `ValidationStage`
 
+The SDK SHOULD avoid logging any payload-derived values beyond these identifiers (e.g., do not log `publicInputs` content).
+
 ## Diagnostics Mode
 
 When diagnostics are enabled explicitly, logs MAY include:

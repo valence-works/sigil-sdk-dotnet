@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.sigil.works/specs/001-proof-envelope/1.0/proof-envelope.schema.json",
+  "title": "Sigil Proof Envelope",
+  "description": "Schema for Spec 001 Proof Envelope v1.0. Forward-compatible: verifiers must ignore unknown top-level fields.",
+  "type": "object",
+  "properties": {
+    "envelopeVersion": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Envelope schema/format version. For Spec 001 v1.0 this must be \"1.0\"."
+    },
+    "proofSystem": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identifier of the proof verification mechanism."
+    },
+    "statementId": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-zA-Z][a-zA-Z0-9+.-]*:.*$",
+      "description": "Identifier of the semantic statement contract (URN)."
+    },
+    "proofBytes": {
+      "type": "string",
+      "minLength": 1,
+      "contentEncoding": "base64",
+      "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$",
+      "description": "Base64-encoded proof bytes."
+    },
+    "publicInputs": {
+      "$ref": "#/$defs/publicInputsV01"
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp for when the envelope was issued."
+    },
+    "policyHash": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable identifier or hash referencing the vendor-side policy snapshot used for issuance."
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Forward-compatible extension point. Verifiers must ignore unknown fields under extensions.",
+      "additionalProperties": true
+    }
+  },
+  "required": ["envelopeVersion", "proofSystem", "statementId", "proofBytes", "publicInputs"],
+  "additionalProperties": true,
+  "$defs": {
+    "publicInputsV01": {
+      "type": "object",
+      "description": "Fixed claim schema (publicInputs) v0.1 as defined by Spec 001.",
+      "properties": {
+        "productId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "edition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "uniqueItems": true
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "maxSeats": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": ["productId", "edition", "features"],
+      "additionalProperties": false
+    }
+  }
+}

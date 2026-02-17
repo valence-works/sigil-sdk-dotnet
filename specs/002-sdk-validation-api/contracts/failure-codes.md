@@ -19,8 +19,15 @@ Failure codes are deterministic identifiers returned in the validation result wh
 | `UnsupportedStatement` | `Unsupported` | `statementId` is syntactically valid but not registered/supported. |
 | `ProofBytesInvalid` | `Malformed` | `proofBytes` could not be decoded as base64 (defense-in-depth beyond schema). |
 | `ProofVerificationFailed` | `Invalid` | Cryptographic verification failed for a supported statement/proof system. |
+| `StatementValidationFailed` | `Invalid` | Statement semantic validation failed for a supported statement. |
 | `LicenseExpired` | `Expired` | Verified envelope is expired at evaluation time. |
+| `ExpiresAtInvalid` | `Malformed` | `expiresAt` was present but not a valid RFC 3339/ISO-8601 date-time. |
+| `StreamReadFailed` | `Error` | Failed to read the input stream (IO/disposal during read). |
 | `InternalError` | `Error` | Unexpected internal failure. |
+
+Notes:
+- Failure codes are implemented as a public enum with explicit numeric values in `src/Sigil.Sdk/Validation/LicenseFailureCode.cs`.
+- `ExpiresAtInvalid` is defense-in-depth; with schema-first validation it should be rare in practice.
 
 ## Status Classification Guidance
 
