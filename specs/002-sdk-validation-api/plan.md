@@ -1,82 +1,111 @@
 # Implementation Plan: SDK Validation API
 
-**Branch**: `002-sdk-validation-api` | **Date**: 2026-02-16 | **Spec**: [specs/002-sdk-validation-api/spec.md](specs/002-sdk-validation-api/spec.md)
-**Input**: Feature specification from /specs/002-sdk-validation-api/spec.md
+**Branch**: `002-sdk-validation-api` | **Date**: 2026-02-17 | **Spec**: [specs/002-sdk-validation-api/spec.md](spec.md)
+**Input**: Feature specification from [specs/002-sdk-validation-api/spec.md](spec.md)
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
 
 ## Summary
 
-Deliver an offline, deterministic Proof Envelope validation API for Sigil SDK that validates Spec 001 envelopes with a result-object model (no exceptions for expected failures). Validation must be schema-first, fail closed, never log `proofBytes`, use immutable DI-provided registries for `proofSystem` and `statementId`, evaluate expiry (`publicInputs.expiresAt`) and return `Expired` when appropriate, and expose `ValidateAsync(string)` and `ValidateAsync(Stream)` entry points.
+Implement a deterministic, result-object validation API for Spec 001 proof envelopes. The plan enforces schema-first validation, immutable DI registries, and fail-closed semantics with stable failure codes, using a single compiled JSON schema and a strict validation pipeline order.
 
 ## Technical Context
 
-**Language/Version**: C# / .NET 8 (planned SDK target)  
-**Primary Dependencies**: System.Text.Json; Microsoft.Extensions.DependencyInjection; Microsoft.Extensions.Logging; Corvus.Json.Validator (Draft 2020-12 JSON Schema)  
+<!--
+  ACTION REQUIRED: Replace the content in this section with the technical details
+  for the project. The structure here is presented in advisory capacity to guide
+  the iteration process.
+-->
+
+**Language/Version**: C# with .NET 8 (`net8.0`)  
+**Primary Dependencies**: Corvus.Json.Validator, Microsoft.Extensions.DependencyInjection.Abstractions, Microsoft.Extensions.Logging.Abstractions  
 **Storage**: N/A  
-**Testing**: xUnit (planned)  
-**Target Platform**: Cross-platform .NET 8 (Windows/macOS/Linux)  
-**Project Type**: Single SDK library  
-**Performance Goals**: Validate <=10 KB envelopes within 1 second offline (per spec success criteria)  
-**Constraints**: Offline-only, deterministic failures, schema-before-crypto, fail-closed, no `proofBytes` logging, diagnostics opt-in  
-**Scale/Scope**: Spec 001 envelope validation plus extensible registries for future statements and proof systems
+**Testing**: xUnit with Microsoft.NET.Test.Sdk  
+**Target Platform**: .NET 8 (cross-platform)  
+**Project Type**: single SDK library  
+**Performance Goals**: p95 < 1s for envelopes <= 10 KB (SC-004)  
+**Constraints**: offline-capable, deterministic results, schema-first validation  
+**Scale/Scope**: single SDK package with unit/performance tests
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- Schema validation MUST run before proof verification. **PASS** (Spec FR-005).
-- Unknown `proofSystem` or `statementId` MUST fail deterministically. **PASS** (Spec FR-006, FR-007, FR-013).
-- Validation failures MUST return a result object (no throws). **PASS** (Spec FR-002).
-- `proofBytes` MUST NOT be logged or emitted in diagnostics. **PASS** (Spec FR-011).
-- Registries MUST be DI-configured and immutable after construction. **PASS** (Spec FR-007).
-- Breaking changes require an ADR/spec with explicit versioning notes. **PASS** (no breaking change proposed).
+[Gates determined based on constitution file]
+
+- Schema validation MUST run before proof verification. **PASS**
+- Unknown `proofSystem` or `statementId` MUST fail deterministically. **PASS**
+- Validation failures MUST return a result object (no throws). **PASS**
+- `proofBytes` MUST NOT be logged or emitted in diagnostics. **PASS**
+- Registries MUST be DI-configured and immutable after construction. **PASS**
+- Breaking changes require an ADR/spec with explicit versioning notes. **PASS**
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/002-sdk-validation-api/
-├── plan.md
-├── research.md
-├── data-model.md
-├── quickstart.md
-├── contracts/
-│   ├── public-api.md
-│   ├── failure-codes.md
-│   └── logging-policy.md
-└── tasks.md
+specs/[###-feature]/
+├── plan.md              # This file (/speckit.plan command output)
+├── research.md          # Phase 0 output (/speckit.plan command)
+├── data-model.md        # Phase 1 output (/speckit.plan command)
+├── quickstart.md        # Phase 1 output (/speckit.plan command)
+├── contracts/           # Phase 1 output (/speckit.plan command)
+└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
 ```
 
 ### Source Code (repository root)
+<!--
+  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
+  for this feature. Delete unused options and expand the chosen structure with
+  real paths (e.g., apps/admin, packages/something). The delivered plan must
+  not include Option labels.
+-->
+
 ```text
 src/
+└── Sigil.Sdk/
+  ├── Contracts/
+  ├── DependencyInjection/
+  ├── Envelope/
+  ├── Logging/
+  ├── Proof/
+  ├── Registries/
+  ├── Schema/
+  ├── Statements/
+  ├── Time/
+  └── Validation/
 
 tests/
+└── Sigil.Sdk.Tests/
+  ├── Logging/
+  ├── Performance/
+  └── Validation/
 ```
 
-**Structure Decision**: Documentation and contracts are produced in `specs/002-sdk-validation-api/`. Implementation work will add/update code under `src/` and `tests/` as described in `tasks.md`.
+**Structure Decision**: Single SDK library with tests under `tests/`.
 
-## Phase 0: Research
+## Complexity Tracking
 
-Resolve dependency choices and validation pipeline decisions needed to implement deterministic, offline schema-first validation (including JSON Schema validator selection and failure-code determinism rules).
+> **Fill ONLY if Constitution Check has violations that must be justified**
 
-## Phase 1: Design & Contracts
+No constitution violations.
 
-- Define the validation result and failure-code data model.
-- Define registry and pipeline contracts (schema-first, registry resolution, crypto verification, expiry classification).
-- Publish contracts in `contracts/` and provide a quickstart.
-- Update agent context via `.specify/scripts/bash/update-agent-context.sh copilot`.
+## Phase 0 — Research Output
 
-## Phase 2: Planning
+- [specs/002-sdk-validation-api/research.md](research.md)
 
-Implementation tasks are generated separately via `/speckit.tasks`.
+## Phase 1 — Design Output
 
-## Post-Design Constitution Check
+- [specs/002-sdk-validation-api/data-model.md](data-model.md)
+- [specs/002-sdk-validation-api/contracts/public-api.md](contracts/public-api.md)
+- [specs/002-sdk-validation-api/contracts/failure-codes.md](contracts/failure-codes.md)
+- [specs/002-sdk-validation-api/contracts/logging-policy.md](contracts/logging-policy.md)
+- [specs/002-sdk-validation-api/quickstart.md](quickstart.md)
 
-- Schema validation precedes proof verification: **PASS** (contracts + research).
-- Deterministic failure for unknown identifiers: **PASS** (failure-code mapping contract).
-- Result-object failures (no exceptions for expected failures): **PASS** (public API contract).
-- No `proofBytes` logging: **PASS** (logging policy contract).
-- Immutable DI registries: **PASS** (registry contract).
+## Constitution Check (Post-Design)
+
+- Schema validation before proof verification: **PASS**
+- Deterministic failure results: **PASS**
+- `proofBytes` never logged/emitted: **PASS**
+- Immutable DI registries: **PASS**

@@ -68,3 +68,15 @@
 
 **Alternatives considered**:
 - Using `DateTime.UtcNow` directly everywhere: simplest, but makes deterministic testing harder.
+
+## Decision 6: Duplicate registry entries
+
+**Decision**: Treat duplicate `proofSystem` or `statementId` registrations as misconfiguration and fail fast during startup/DI construction.
+
+**Rationale**:
+- Prevents nondeterministic routing and hidden overrides.
+- Aligns with deterministic validation and immutable registries.
+
+**Alternatives considered**:
+- Last registration wins: risks silent behavior changes.
+- First registration wins: hides configuration mistakes.
