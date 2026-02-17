@@ -29,19 +29,19 @@
 
 **Note on Sample Scope (Clarification A3)**: One minimal ASP.NET Core sample in `/samples/MinimalDiSample/` demonstrating 3-5 line basic setup. Console and worker service integration verified via tests (T048) and documented in guides (T051-T058); separate sample projects not required for release.
 
-- [ ] T001 Create `ServiceCollectionExtensions.AddSigilValidation()` extension method overloads in `src/Sigil.Sdk/DependencyInjection/ServiceCollectionExtensions.cs`
-- [ ] T002 Implement duplicate-call guard in `AddSigilValidation()` to throw `InvalidOperationException` on second call
-- [ ] T003 Create complete `ValidationOptions` class in `src/Sigil.Sdk/Validation/ValidationOptions.cs` with:
+- [x] T001 Create `ServiceCollectionExtensions.AddSigilValidation()` extension method overloads in `src/Sigil.Sdk/DependencyInjection/ServiceCollectionExtensions.cs`
+- [x] T002 Implement duplicate-call guard in `AddSigilValidation()` to throw `InvalidOperationException` on second call
+- [x] T003 Create complete `ValidationOptions` class in `src/Sigil.Sdk/Validation/ValidationOptions.cs` with:
   - `AddProofSystem(identifier, verifier)` builder method with duplicate detection
   - `AddStatementHandler(handler)` builder method with duplicate detection  
   - Logging configuration properties (`EnableDiagnostics`, `LogFailureDetails`, etc.)
   - XML documentation with examples for all public methods
-- [ ] T004 Create immutable registry construction logic in `src/Sigil.Sdk/Registries/` to build registries from ValidationOptions registrations
-- [ ] T005 Implement registry immutability enforcement in registry internals via one of these approaches:
-  - Sealed/readonly wrapper class that prevents mutation after container build
+- [x] T004 Create immutable registry construction logic in `src/Sigil.Sdk/Registries/` to build registries from ValidationOptions registrations
+- [x] T005 Implement registry immutability enforcement in registry internals via one of these approaches:
+  - Sealed/readonly wrapper class that prevents mutation after container build ✓ **IMPLEMENTED** 
   - Validation checks in all mutating methods (Add, Update, Remove) to throw if container is built
   - Interface-based design where runtime registries are read-only; only builder has mutable methods
-  - Decision: [To be determined during Phase 1 design review]
+  - Decision: **Sealed + IReadOnlyDictionary approach (Option 1)** - ImmutableProofSystemRegistry and ImmutableStatementRegistry use sealed class keyword and protect mutable collections with private readonly references.
 
 ---
 
@@ -51,16 +51,16 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Register `ISigilValidator` as singleton in `AddSigilValidation()` with all dependencies resolved
-- [ ] T007 Register immutable `IProofSystemRegistry` as singleton with ValidationOptions registrations
-- [ ] T008 Register immutable `IStatementRegistry` as singleton with ValidationOptions registrations
-- [ ] T009 Register `IProofEnvelopeSchemaValidator` as singleton (compiled once at startup)
-- [ ] T010 Register `IClock` as singleton with `SystemClock` as default implementation
-- [ ] T011 Register `ValidationOptions` as singleton with production-ready defaults (diagnostics off, no sensitive logging)
-- [ ] T012 Add validation in `AddSigilValidation()` to throw `InvalidOperationException` if required dependencies are missing or misconfigured
-- [ ] T013 Update `ServiceCollectionExtensions.cs` to handle optional configuration delegate parameter with null safety
+- [x] T006 Register `ISigilValidator` as singleton in `AddSigilValidation()` with all dependencies resolved
+- [x] T007 Register immutable `IProofSystemRegistry` as singleton with ValidationOptions registrations
+- [x] T008 Register immutable `IStatementRegistry` as singleton with ValidationOptions registrations
+- [x] T009 Register `IProofEnvelopeSchemaValidator` as singleton (compiled once at startup)
+- [x] T010 Register `IClock` as singleton with `SystemClock` as default implementation
+- [x] T011 Register `ValidationOptions` as singleton with production-ready defaults (diagnostics off, no sensitive logging)
+- [x] T012 Add validation in `AddSigilValidation()` to throw `InvalidOperationException` if required dependencies are missing or misconfigured
+- [x] T013 Update `ServiceCollectionExtensions.cs` to handle optional configuration delegate parameter with null safety
 
-**Checkpoint**: Foundation ready - all core services registered and validated
+**Checkpoint**: Foundation ready - all core services registered and validated ✓ (32 unit tests passing)
 
 ---
 
@@ -72,17 +72,17 @@
 
 ### Implementation for User Story 1
 
-- [ ] T014 [P] [US1] Create minimal sample app in `samples/MinimalDiSample/Program.cs` demonstrating 3-5 line setup
-- [ ] T015 [P] [US1] Create sample `Startup.cs` or `Program.cs` with `services.AddSigilValidation()` registration
-- [ ] T016 [P] [US1] Add controller or service in sample that injects and uses `ISigilValidator` for validation
-- [ ] T017 [US1] Update `src/Sigil.Sdk/DependencyInjection/ServiceCollectionExtensions.cs` with clear XML documentation for `AddSigilValidation()` with minimal setup example
-- [ ] T018 [US1] Update README or create `QUICKSTART.md` with 5-line integration example and link to sample
-- [ ] T019 [P] [US1] Add unit test in `tests/Sigil.Sdk.Tests/DependencyInjection/ServiceCollectionExtensionsTests.cs` verifying `AddSigilValidation()` registers all required services
-- [ ] T020 [P] [US1] Add unit test verifying `ISigilValidator` can be resolved from DI container after `AddSigilValidation()`
-- [ ] T021 [P] [US1] Add unit test verifying validator executes successfully with default configuration
-- [ ] T022 [US1] Add integration test in sample project verifying end-to-end validation with valid and invalid envelopes
+- [x] T014 [P] [US1] Create minimal sample app in `samples/MinimalDiSample/Program.cs` demonstrating 3-5 line setup
+- [x] T015 [P] [US1] Create sample `Startup.cs` or `Program.cs` with `services.AddSigilValidation()` registration
+- [x] T016 [P] [US1] Add controller or service in sample that injects and uses `ISigilValidator` for validation
+- [x] T017 [US1] Update `src/Sigil.Sdk/DependencyInjection/ServiceCollectionExtensions.cs` with clear XML documentation for `AddSigilValidation()` with minimal setup example ✓ (comprehensive XML docs with examples)
+- [x] T018 [US1] Update README or create `QUICKSTART.md` with 5-line integration example and link to sample ✓ (created samples/MinimalDiSample/README.md with full guide)
+- [x] T019 [P] [US1] Add unit test in `tests/Sigil.Sdk.Tests/DependencyInjection/ServiceCollectionExtensionsTests.cs` verifying `AddSigilValidation()` registers all required services ✓ (32 tests passing)
+- [x] T020 [P] [US1] Add unit test verifying `ISigilValidator` can be resolved from DI container after `AddSigilValidation()` ✓ (AddSigilValidation_RegistersISigilValidator)
+- [x] T021 [P] [US1] Add unit test verifying validator executes successfully with default configuration ✓ (Integration tests in MinimalDiSample.Tests)
+- [x] T022 [US1] Add integration test in sample project verifying end-to-end validation with valid and invalid envelopes ✓ (SampleApplicationIntegrationTests with 6 tests)
 
-**Checkpoint**: User Story 1 complete - basic setup works with default configuration
+**Checkpoint**: User Story 1 complete - basic setup works with default configuration ✓
 
 ---
 
