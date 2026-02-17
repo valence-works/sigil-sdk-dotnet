@@ -107,6 +107,17 @@ A developer working with custom proof systems or statement types needs to extend
 - Q: What should occur if a developer tries to modify registries after the service container is built? → A: Throw InvalidOperationException when modification is attempted after container build
 - Q: How should the system behave if required dependencies (like `IOptions<ValidationOptions>`) are missing or misconfigured? → A: Throw InvalidOperationException during registration or container build with clear guidance
 - Q: What should happen when a custom proof system verifier throws an exception during registration? → A: Throw InvalidOperationException immediately with context
+- Q: What is the relationship between ValidationOptions and configuration classes? → A: Single `ValidationOptions` class (renamed from `ValidationSigilOptions`) with builder methods
+- Q: How should ValidationOptions builder be implemented? → A: Create complete skeleton with all builder methods upfront in Phase 1 (T003); tests and refinements in user story phases
+- Q: Should there be one minimal sample or multiple samples? → A: One minimal ASP.NET Core sample in `/samples/MinimalDiSample/` demonstrating basic setup; documented patterns for console/worker scenarios
+
+### Pending Design Decisions (to be resolved before Phase 2)
+
+- **A4 - Registry Immutability Mechanism**: How should the system enforce that registries (proof systems & statements) cannot be modified after service container is built? Three proposed approaches:
+  - **Option 1: Sealed Wrapper Class**: Create a sealed "read-only" wrapper around mutable registry that throws when mutation methods are called
+  - **Option 2: Validation Checks**: Add runtime validation in mutation methods (AddProofSystem, AddStatementHandler) that checks container state and throws if already built
+  - **Option 3: Interface Split**: Expose immutable read interface (IProofSystemRegistry) for consumers; keep mutation interface (IProofSystemRegistryBuilder) internal to configuration phase only
+  - **TBD**: To be determined during Phase 1 design review (T005); selection impacts implementation approach for T008-T013
 
 ## Success Criteria *(mandatory)*
 

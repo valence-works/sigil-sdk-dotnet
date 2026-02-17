@@ -25,12 +25,23 @@
 
 **Purpose**: DI extension method framework and supporting infrastructure
 
+**Note on Sample Scope (Clarification A3)**: One minimal ASP.NET Core sample in `/samples/MinimalDiSample/` demonstrating 3-5 line basic setup. Console and worker service integration verified via tests (T048) and documented in guides (T051-T058); separate sample projects not required for release.
+
+**Note on Sample Scope (Clarification A3)**: One minimal ASP.NET Core sample in `/samples/MinimalDiSample/` demonstrating 3-5 line basic setup. Console and worker service integration verified via tests (T048) and documented in guides (T051-T058); separate sample projects not required for release.
+
 - [ ] T001 Create `ServiceCollectionExtensions.AddSigilValidation()` extension method overloads in `src/Sigil.Sdk/DependencyInjection/ServiceCollectionExtensions.cs`
 - [ ] T002 Implement duplicate-call guard in `AddSigilValidation()` to throw `InvalidOperationException` on second call
-- [ ] T003 Create `ValidationSigilOptions` configuration builder class in `src/Sigil.Sdk/DependencyInjection/ValidationSigilOptions.cs` with `AddProofSystem()` and `AddStatementHandler()` methods
-- [ ] T004 Implement duplicate identifier detection in `ValidationSigilOptions` to throw `InvalidOperationException` immediately
-- [ ] T005 Create immutable registry construction logic in `src/Sigil.Sdk/Registries/` to build registries from collected registrations
-- [ ] T006 Implement registry immutability enforcement (throw on modification attempts after container build) in registry internals
+- [ ] T003 Create complete `ValidationOptions` class in `src/Sigil.Sdk/Validation/ValidationOptions.cs` with:
+  - `AddProofSystem(identifier, verifier)` builder method with duplicate detection
+  - `AddStatementHandler(handler)` builder method with duplicate detection  
+  - Logging configuration properties (`EnableDiagnostics`, `LogFailureDetails`, etc.)
+  - XML documentation with examples for all public methods
+- [ ] T004 Create immutable registry construction logic in `src/Sigil.Sdk/Registries/` to build registries from ValidationOptions registrations
+- [ ] T005 Implement registry immutability enforcement in registry internals via one of these approaches:
+  - Sealed/readonly wrapper class that prevents mutation after container build
+  - Validation checks in all mutating methods (Add, Update, Remove) to throw if container is built
+  - Interface-based design where runtime registries are read-only; only builder has mutable methods
+  - Decision: [To be determined during Phase 1 design review]
 
 ---
 
@@ -40,14 +51,14 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T007 Register `ISigilValidator` as singleton in `AddSigilValidation()` with all dependencies resolved
-- [ ] T008 Register immutable `IProofSystemRegistry` as singleton with empty default state
-- [ ] T009 Register immutable `IStatementRegistry` as singleton with empty default state
-- [ ] T010 Register `IProofEnvelopeSchemaValidator` as singleton (compiled once at startup)
-- [ ] T011 Register `IClock` as singleton with `SystemClock` as default implementation
-- [ ] T012 Register `ValidationOptions` as singleton with production-ready defaults (diagnostics off, no sensitive logging)
-- [ ] T013 Add validation in `AddSigilValidation()` to throw `InvalidOperationException` if required dependencies are missing or misconfigured
-- [ ] T014 Update `ServiceCollectionExtensions.cs` to handle optional configuration delegate parameter with null safety
+- [ ] T006 Register `ISigilValidator` as singleton in `AddSigilValidation()` with all dependencies resolved
+- [ ] T007 Register immutable `IProofSystemRegistry` as singleton with ValidationOptions registrations
+- [ ] T008 Register immutable `IStatementRegistry` as singleton with ValidationOptions registrations
+- [ ] T009 Register `IProofEnvelopeSchemaValidator` as singleton (compiled once at startup)
+- [ ] T010 Register `IClock` as singleton with `SystemClock` as default implementation
+- [ ] T011 Register `ValidationOptions` as singleton with production-ready defaults (diagnostics off, no sensitive logging)
+- [ ] T012 Add validation in `AddSigilValidation()` to throw `InvalidOperationException` if required dependencies are missing or misconfigured
+- [ ] T013 Update `ServiceCollectionExtensions.cs` to handle optional configuration delegate parameter with null safety
 
 **Checkpoint**: Foundation ready - all core services registered and validated
 
@@ -61,15 +72,15 @@
 
 ### Implementation for User Story 1
 
-- [ ] T015 [P] [US1] Create minimal sample app in `samples/MinimalDiSample/Program.cs` demonstrating 3-5 line setup
-- [ ] T016 [P] [US1] Create sample `Startup.cs` or `Program.cs` with `services.AddSigilValidation()` registration
-- [ ] T017 [P] [US1] Add controller or service in sample that injects and uses `ISigilValidator` for validation
-- [ ] T018 [US1] Update `src/Sigil.Sdk/DependencyInjection/ServiceCollectionExtensions.cs` with clear XML documentation for `AddSigilValidation()` with minimal setup example
-- [ ] T019 [US1] Update README or create `QUICKSTART.md` with 5-line integration example and link to sample
-- [ ] T020 [P] [US1] Add unit test in `tests/Sigil.Sdk.Tests/DependencyInjection/ServiceCollectionExtensionsTests.cs` verifying `AddSigilValidation()` registers all required services
-- [ ] T021 [P] [US1] Add unit test verifying `ISigilValidator` can be resolved from DI container after `AddSigilValidation()`
-- [ ] T022 [P] [US1] Add unit test verifying validator executes successfully with default configuration
-- [ ] T023 [US1] Add integration test in sample project verifying end-to-end validation with valid and invalid envelopes
+- [ ] T014 [P] [US1] Create minimal sample app in `samples/MinimalDiSample/Program.cs` demonstrating 3-5 line setup
+- [ ] T015 [P] [US1] Create sample `Startup.cs` or `Program.cs` with `services.AddSigilValidation()` registration
+- [ ] T016 [P] [US1] Add controller or service in sample that injects and uses `ISigilValidator` for validation
+- [ ] T017 [US1] Update `src/Sigil.Sdk/DependencyInjection/ServiceCollectionExtensions.cs` with clear XML documentation for `AddSigilValidation()` with minimal setup example
+- [ ] T018 [US1] Update README or create `QUICKSTART.md` with 5-line integration example and link to sample
+- [ ] T019 [P] [US1] Add unit test in `tests/Sigil.Sdk.Tests/DependencyInjection/ServiceCollectionExtensionsTests.cs` verifying `AddSigilValidation()` registers all required services
+- [ ] T020 [P] [US1] Add unit test verifying `ISigilValidator` can be resolved from DI container after `AddSigilValidation()`
+- [ ] T021 [P] [US1] Add unit test verifying validator executes successfully with default configuration
+- [ ] T022 [US1] Add integration test in sample project verifying end-to-end validation with valid and invalid envelopes
 
 **Checkpoint**: User Story 1 complete - basic setup works with default configuration
 
@@ -83,16 +94,16 @@
 
 ### Implementation for User Story 2
 
-- [ ] T024 [P] [US2] Extend `ValidationOptions` in `src/Sigil.Sdk/Validation/ValidationOptions.cs` with additional configuration properties for logging behavior (e.g., `LogFailureDetails`, `LogSessionInfo`)
-- [ ] T025 [P] [US2] Update `ValidationSigilOptions` builder to accept and apply logging configuration options
-- [ ] T026 [P] [US2] Update `LicenseValidator` to respect `ValidationOptions` logging configuration when writing to logs
-- [ ] T027 [US2] Update `ValidationLogging.cs` helpers to check `ValidationOptions` before logging sensitive data
-- [ ] T028 [P] [US2] Add implementation in `AddSigilValidation()` to pass options to validator correctly
-- [ ] T029 [P] [US2] Add unit test in `tests/Sigil.Sdk.Tests/DependencyInjection/ServiceCollectionExtensionsTests.cs` verifying configuration delegate is applied
-- [ ] T030 [P] [US2] Add unit test verifying `options.LogFailureDetails = false` prevents detailed logging
-- [ ] T031 [P] [US2] Add integration test verifying custom diagnostics configuration is respected during validation
-- [ ] T032 [US2] Add sample code in `samples/MinimalDiSample/` demonstrating diagnostics configuration option
-- [ ] T033 [US2] Update documentation with diagnostics configuration examples and best practices
+- [ ] T023 [P] [US2] Update `LicenseValidator` to respect `ValidationOptions` logging configuration when writing to logs
+- [ ] T025 [P] [US2] Update `ValidationOptions` to accept and apply logging configuration options
+- [ ] T025 [P] [US2] Add implementation in `AddSigilValidation()` to pass options to validator correctly
+- [ ] T026 [P] [US2] Add unit test in `tests/Sigil.Sdk.Tests/DependencyInjection/ServiceCollectionExtensionsTests.cs` verifying configuration delegate is applied
+- [ ] T027 [P] [US2] Add unit test verifying `options.LogFailureDetails = false` prevents detailed logging
+- [ ] T028 [P] [US2] Add integration test verifying custom diagnostics configuration is respected during validation
+- [ ] T029 [US2] Add sample code in `samples/MinimalDiSample/` demonstrating diagnostics configuration option
+- [ ] T030 [US2] Update documentation with diagnostics configuration examples and best practices
+- [ ] T031 [P] [US3] Implement `ValidationOptions.AddProofSystem(identifier, verifier)` method that adds verifier to internal collection and validates no duplicates
+- [ ] T032 [P] [US3] Implement `ValidationOptions.AddStatementHandler(handler)` method that adds handler to internal collection
 
 **Checkpoint**: User Stories 1 & 2 complete - diagnostics configuration working independently
 
@@ -106,19 +117,19 @@
 
 ### Implementation for User Story 3
 
-- [ ] T034 [P] [US3] Implement `ValidationSigilOptions.AddProofSystem(identifier, verifier)` method that adds verifier to internal collection and validates no duplicates
-- [ ] T035 [P] [US3] Implement `ValidationSigilOptions.AddStatementHandler(handler)` method that adds handler to internal collection
-- [ ] T036 [P] [US3] Update registry construction in Phase 2 to include custom systems from `ValidationSigilOptions`
-- [ ] T037 [P] [US3] Add duplicate identifier detection in `AddProofSystem()` to throw `InvalidOperationException` immediately
-- [ ] T038 [P] [US3] Add duplicate identifier detection in `AddStatementHandler()` to throw `InvalidOperationException` immediately
-- [ ] T039 [P] [US3] Update XML documentation in `ValidationSigilOptions` with clear examples for `AddProofSystem()` and `AddStatementHandler()`
-- [ ] T040 [P] [US3] Add unit test in `tests/Sigil.Sdk.Tests/DependencyInjection/ServiceCollectionExtensionsTests.cs` verifying custom proof system can be registered
-- [ ] T041 [P] [US3] Add unit test verifying duplicate proof system identifier throws `InvalidOperationException`
-- [ ] T042 [P] [US3] Add unit test verifying custom statement handler can be registered
-- [ ] T043 [P] [US3] Add unit test verifying duplicate statement identifier throws `InvalidOperationException`
-- [ ] T044 [US3] Add integration test verifying custom verifier/handler is invoked during validation when applicable
-- [ ] T045 [P] [US3] Add sample code in `samples/MinimalDiSample/` demonstrating custom system registration and extension usage
-- [ ] T046 [US3] Update documentation with extension point examples and patterns for developers adding custom systems
+- [ ] T033 [P] [US3] Update registry construction in Phase 2 to include custom systems from `ValidationOptions`
+- [ ] T034 [P] [US3] Add duplicate identifier detection in `AddProofSystem()` to throw `InvalidOperationException` immediately
+- [ ] T035 [P] [US3] Add duplicate identifier detection in `AddStatementHandler()` to throw `InvalidOperationException` immediately
+- [ ] T036 [P] [US3] Update XML documentation in `ValidationOptions` with clear examples for `AddProofSystem()` and `AddStatementHandler()`
+- [ ] T037 [P] [US3] Add unit test in `tests/Sigil.Sdk.Tests/DependencyInjection/ServiceCollectionExtensionsTests.cs` verifying custom proof system can be registered
+- [ ] T038 [P] [US3] Add unit test verifying duplicate proof system identifier throws `InvalidOperationException`
+- [ ] T039 [P] [US3] Add unit test verifying custom statement handler can be registered
+- [ ] T040 [P] [US3] Add unit test verifying duplicate statement identifier throws `InvalidOperationException`
+- [ ] T041 [US3] Add integration test verifying custom verifier/handler is invoked during validation when applicable
+- [ ] T042 [P] [US3] Add sample code in `samples/MinimalDiSample/` demonstrating custom system registration and extension usage
+- [ ] T043 [US3] Update documentation with extension point examples and patterns for developers adding custom systems
+- [ ] T044 [P] Add unit test verifying second call to `AddSigilValidation()` throws `InvalidOperationException` with clear message
+- [ ] T045 [P] Add unit test verifying missing required dependencies throw `InvalidOperationException` during registration with guidance
 
 **Checkpoint**: All user stories complete - extension points working and documented
 
@@ -128,13 +139,13 @@
 
 **Purpose**: Implement and test all edge cases identified in spec
 
-- [ ] T047 [P] Add unit test verifying second call to `AddSigilValidation()` throws `InvalidOperationException` with clear message
-- [ ] T048 [P] Add unit test verifying missing required dependencies throw `InvalidOperationException` during registration with guidance
-- [ ] T049 [P] Add unit test verifying exception from custom verifier during registration is wrapped as `InvalidOperationException`
-- [ ] T050 [P] Add unit test verifying runtime modification of registries after container build throws `InvalidOperationException`
-- [ ] T051 [P] Add integration test for multiple application hosting scenarios (ASP.NET Core, console app, worker service)
-- [ ] T052 [P] Add performance test verifying schema compilation completes in under 100 milliseconds
-- [ ] T053 [P] Add memory profiling test verifying service overhead under 5 MB with default configuration
+- [ ] T046 [P] Add unit test verifying exception from custom verifier during registration is wrapped as `InvalidOperationException`
+- [ ] T047 [P] Add unit test verifying runtime modification of registries after container build throws `InvalidOperationException`
+- [ ] T048 [P] Add integration test for multiple application hosting scenarios (ASP.NET Core, console app, worker service)
+- [ ] T049 [P] Add performance test verifying schema compilation completes in under 100 milliseconds
+- [ ] T050 [P] Add memory profiling test verifying service overhead under 5 MB with default configuration
+- [ ] T051 Create comprehensive integration guide in `docs/DI_INTEGRATION.md` with minimal setup, options configuration, and extension patterns
+- [ ] T052 Update main `README.md` with link to DI integration guide and 3-line quick reference
 
 ---
 
@@ -142,15 +153,15 @@
 
 **Purpose**: Complete documentation and prepare for release
 
-- [ ] T054 Create comprehensive integration guide in `docs/DI_INTEGRATION.md` with minimal setup, options configuration, and extension patterns
-- [ ] T055 Update main `README.md` with link to DI integration guide and 3-line quick reference
-- [ ] T056 Create `MIGRATION.md` for developers integrating from prior setup patterns to `AddSigilValidation()`
-- [ ] T057 Update `docs/architecture.md` with DI integration strategy and service lifetime decisions
-- [ ] T058 Add inline code examples to XML docstrings for all public extension methods
-- [ ] T059 Create troubleshooting guide for common DI registration issues and solutions
-- [ ] T060 Verify no `proofBytes` appear in any log statements or error messages via code review
-- [ ] T061 Update `CHANGELOG.md` with DI integration feature, all new overloads, and deprecations (if any)
-- [ ] T062 Validate compliance with SDK constitution (schema-first, deterministic failures, immutable registries, no breaking changes)
+- [ ] T053 Create `MIGRATION.md` for developers integrating from prior setup patterns to `AddSigilValidation()`
+- [ ] T054 Update `docs/architecture.md` with DI integration strategy and service lifetime decisions
+- [ ] T055 Add inline code examples to XML docstrings for all public extension methods
+- [ ] T056 Create troubleshooting guide for common DI registration issues and solutions
+- [ ] T057 Verify no `proofBytes` appear in any log statements or error messages via code review
+- [ ] T058 Update `CHANGELOG.md` with DI integration feature, all new overloads, and deprecations (if any)
+- [ ] T059 Validate compliance with SDK constitution (schema-first, deterministic failures, immutable registries, no breaking changes)
+- [ ] T060 [P] Run full test suite for all existing functionality (regression testing)
+- [ ] T061 [P] Run full test suite for new DI integration features (T019-T050)
 
 ---
 
@@ -158,16 +169,16 @@
 
 **Purpose**: Comprehensive testing before merge
 
-- [ ] T063 [P] Run full test suite for all existing functionality (regression testing)
-- [ ] T064 [P] Run full test suite for new DI integration features (T020-T053)
-- [ ] T065 [P] Build and run sample project successfully on .NET 10
-- [ ] T066 [P] Build and run sample project successfully on .NET 8
-- [ ] T067 [P] Verify NuGet package dependency versions are .NET 10 compatible
-- [ ] T068 [P] Generate API documentation and verify no broken links
-- [ ] T069 Run static analysis tool (if configured) and resolve any new issues
-- [ ] T070 Code review: verify all edge cases handled per spec clarifications
-- [ ] T071 Code review: verify immutability of registries enforced
-- [ ] T072 Code review: verify all required exceptions throw with clear, actionable messages
+- [ ] T062 [P] Build and run sample project successfully on .NET 10
+- [ ] T063 [P] Build and run sample project successfully on .NET 8
+- [ ] T064 [P] Verify NuGet package dependency versions are .NET 10 compatible
+- [ ] T065 [P] Generate API documentation and verify no broken links
+- [ ] T066 Run static analysis tool (if configured) and resolve any new issues
+- [ ] T067 Code review: verify all edge cases handled per spec clarifications
+- [ ] T068 Code review: verify immutability of registries enforced
+- [ ] T069 Code review: verify all required exceptions throw with clear, actionable messages
+- [ ] T070 Performance profiling: schema compilation, service resolution, validation latency
+- [ ] T071 Update coverage reports if applicable
 - [ ] T073 Performance profiling: schema compilation, service resolution, validation latency
 - [ ] T074 Update coverage reports if applicable
 
@@ -226,15 +237,15 @@
 
 | Success Criterion | Supporting Tasks | Verified By |
 |---|---|---|
-| SC-001: 5 min setup, ≤5 lines | T015-T019, T054 | T023, code review |
-| SC-002: Schema compile <100ms | T010, T052 | T052 (performance test) |
-| SC-003: 90% success on first attempt | T018-T019, T054 | Developer feedback |
-| SC-004: Memory <5MB | T001-T014, T053 | T053 (memory test) |
-| SC-005: 2 lines per extension | T034-T045, T046 | Code review, documentation |
-| SC-006: Works in all host types | T051 | T051 (integration test) |
-| SC-007: 4.5+/5 doc rating | T054-T059 | Developer survey |
-| SC-008: Zero DI resolution failures | T020-T023 | T070 (code review) |
-| SC-009: Sample <50 lines (excl boilerplate) | T015-T017 | Code review |
+| SC-001: 5 min setup, ≤5 lines | T014-T018, T051 | T022, code review |
+| SC-002: Schema compile <100ms | T009, T049 | T049 (performance test) |
+| SC-003: 90% success on first attempt | T017-T018, T051 | Developer feedback |
+| SC-004: Memory <5MB | T001-T013, T050 | T050 (memory test) |
+| SC-005: 2 lines per extension | T031-T042, T043 | Code review, documentation |
+| SC-006: Works in all host types | T048 | T048 (integration test) |
+| SC-007: 4.5+/5 doc rating | T051-T058 | Developer survey |
+| SC-008: Zero DI resolution failures | T019-T022 | T067 (code review) |
+| SC-009: Sample <50 lines (excl boilerplate) | T014-T016 | Code review |
 | SC-010: Support tickets -75% | Delivery & monitoring | Post-release metrics |
 
 ---
@@ -242,7 +253,7 @@
 ## Notes for Implementation
 
 - **Spec Reference**: All tasks reference Spec 001 (Proof Envelope Format) and Spec 002 (Validation API) as already-complete dependencies
-- **Constitution Compliance**: Tasks T004, T037-T038, T047, T049-T050 explicitly implement constitution requirements
+- **Constitution Compliance**: Tasks T004, T034-T035, T044, T046-T047 explicitly implement constitution requirements
 - **Testing First**: Consider running contract/unit tests before implementation to verify spec correctness
 - **Documentation as Code**: Keep examples in XML docstrings updated alongside implementation
-- **Performance**: T052-T053 must run before release to validate SC-002 and SC-004 targets
+- **Performance**: T049-T050 must run before release to validate SC-002 and SC-004 targets

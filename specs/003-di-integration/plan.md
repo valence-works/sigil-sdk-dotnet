@@ -68,7 +68,7 @@ samples/
 └── [new minimal app for DI integration]
 ```
 
-**Structure Decision**: Single library with tests and a new minimal sample under `samples/`.
+**Structure Decision**: Single library with tests and one minimal ASP.NET Core sample under `samples/MinimalDiSample/`. Patterns for console and worker service scenarios documented but not implemented as separate samples (see T048 and documentation tasks T051-T058).
 
 ## Phase 0: Research
 
@@ -82,7 +82,7 @@ samples/
 
 ### Data Model
 
-- Define configuration entities: `ValidationOptions`, proof system registrations, statement registrations, and immutable registries.
+- Define configuration entities: `ValidationOptions` (with builder methods), proof system registrations, statement registrations, and immutable registries.
 - Document schema validator and clock roles.
 
 **Output**: [specs/003-di-integration/data-model.md](specs/003-di-integration/data-model.md)
