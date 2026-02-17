@@ -59,11 +59,11 @@ A developer working with custom proof systems or statement types needs to extend
 
 ### Edge Cases
 
-- What happens when `AddSigilValidation()` is called multiple times in the same service collection?
-- How does the system handle registering duplicate proof systems with the same identifier?
-- What occurs if a developer tries to modify registries after service registration completes?
-- How does the system behave if required dependencies (like `IOptions<ValidationOptions>`) are missing or misconfigured?
-- What happens when a custom proof system verifier throws an exception during registration?
+- When `AddSigilValidation()` is called multiple times on the same service collection, it throws `InvalidOperationException` with a clear error message
+- When registering duplicate proof systems with the same identifier, the system throws `InvalidOperationException` immediately during registration
+- When a developer tries to modify registries after service registration completes, the system throws `InvalidOperationException`
+- When required dependencies (like `IOptions<ValidationOptions>`) are missing or misconfigured, the system throws `InvalidOperationException` during registration or container build
+- When a custom proof system verifier throws during registration, the system throws `InvalidOperationException` with context and fails fast
 
 ## Requirements *(mandatory)*
 
@@ -75,16 +75,18 @@ A developer working with custom proof systems or statement types needs to extend
 - **FR-004**: The extension method MUST register and compile the schema validator exactly once, ensuring optimal startup performance
 - **FR-005**: The extension method MUST register a default clock implementation (system clock) for time-based validation operations
 - **FR-006**: The extension method MUST accept an optional configuration delegate for `ValidationOptions` to customize diagnostics and logging behavior
-- **FR-007**: The configuration API MUST provide a clear method for adding custom proof system verifiers (e.g., `options.AddProofSystem(identifier, verifier)`)
-- **FR-008**: The configuration API MUST provide a clear method for adding custom statement handlers (e.g., `options.AddStatementHandler(handler)`)
+- **FR-007**: The configuration API MUST provide a clear method for adding custom proof system verifiers (e.g., `options.AddProofSystem(identifier, verifier)`) and MUST throw `InvalidOperationException` immediately if a duplicate identifier is registered
+- **FR-008**: The configuration API MUST provide a clear method for adding custom statement handlers (e.g., `options.AddStatementHandler(handler)`) and MUST throw `InvalidOperationException` immediately if a duplicate identifier is registered
 - **FR-009**: All registered services MUST use appropriate DI lifetimes (singleton for immutable registries and schema validator, scoped or transient as appropriate for stateful services)
 - **FR-010**: Default configuration MUST be production-ready with secure defaults (no sensitive data logging, reasonable performance settings)
-- **FR-011**: The extension method MUST throw a clear exception if called multiple times on the same service collection, following .NET DI extension method conventions
+- **FR-011**: The extension method MUST throw `InvalidOperationException` with a clear, actionable error message if called multiple times on the same service collection
 - **FR-012**: Documentation MUST include a minimal working example requiring no more than 5 lines of setup code
 - **FR-013**: A sample project in `/samples` MUST demonstrate the typical integration pattern for a .NET application
 - **FR-014**: Schema validator registration MUST use compiled schema validation for runtime performance (ref: spec 001 & 002 requirements for schema validation)
-- **FR-015**: Registry registration MUST enforce immutability after service container is built, preventing runtime modifications (ref: SDK constitution on registry immutability)
+- **FR-015**: Registry registration MUST enforce immutability after service container is built by throwing `InvalidOperationException` on any modification attempt (ref: SDK constitution on registry immutability)
 - **FR-016**: Logging configuration MUST respect the no-proofBytes-logging constraint from the SDK constitution
+- **FR-016a**: Missing or misconfigured required dependencies MUST cause `InvalidOperationException` during registration or container build with a clear, actionable message
+- **FR-016b**: Exceptions thrown by custom proof system verifiers during registration MUST be wrapped or surfaced as `InvalidOperationException` with clear context and must fail fast
 - **FR-017**: The extension method MUST integrate with ASP.NET Core dependency injection and support generic .NET host scenarios
 
 ## Assumptions
@@ -95,6 +97,16 @@ A developer working with custom proof systems or statement types needs to extend
 - Developers using this integration have basic familiarity with .NET dependency injection concepts
 - Schema compilation is a one-time operation that can be performed at startup without significant performance impact
 - Applications using this integration can tolerate startup-time initialization of validation infrastructure
+
+## Clarifications
+
+### Session 2026-02-17
+
+- Q: What should happen when `AddSigilValidation()` is called multiple times on the same service collection? → A: Throw InvalidOperationException on second call with clear error message
+- Q: How should the system handle registering duplicate proof systems with the same identifier? → A: Throw InvalidOperationException immediately when duplicate detected during registration
+- Q: What should occur if a developer tries to modify registries after the service container is built? → A: Throw InvalidOperationException when modification is attempted after container build
+- Q: How should the system behave if required dependencies (like `IOptions<ValidationOptions>`) are missing or misconfigured? → A: Throw InvalidOperationException during registration or container build with clear guidance
+- Q: What should happen when a custom proof system verifier throws an exception during registration? → A: Throw InvalidOperationException immediately with context
 
 ## Success Criteria *(mandatory)*
 
