@@ -42,6 +42,52 @@ public sealed class ValidationPerformanceBenchmarks
         Assert.True(p95 >= TimeSpan.Zero);
     }
 
+    /// <summary>
+    /// T049: Verify schema compilation completes in under 100 milliseconds
+    /// Spec 003 (SC-002): Schema compilation must be fast for startup performance
+    /// </summary>
+    [Fact]
+    public void ProofEnvelopeSchemaValidator_Compilation_CompletesUnder100Milliseconds()
+    {
+        // Arrange & Act - Measure schema compilation time
+        var sw = Stopwatch.StartNew();
+        var validator = new ProofEnvelopeSchemaValidator();
+        sw.Stop();
+
+        // Assert - Schema compilation should be under 100ms (Spec 003 SC-002)
+        Assert.True(sw.Elapsed.TotalMilliseconds < 100, 
+            $"Schema compilation took {sw.Elapsed.TotalMilliseconds:F2}ms, expected < 100ms");
+    }
+
+    /// <summary>
+    /// T050: Verify service overhead remains under 5 MB with default configuration
+    /// Spec 003 (SC-004): Memory footprint must be minimal for embedded use cases
+    /// </summary>
+    [Fact]
+    public void ValidatorServices_MemoryOverhead_Under5MB_WithDefaults()
+    {
+        // Arrange - Force garbage collection to get baseline
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+
+        var memoryBefore = GC.GetTotalMemory(forceFullCollection: true);
+
+        // Act - Create validator with default configuration
+        var validator = CreateValidator(nowUtc: DateTimeOffset.UtcNow);
+        
+        // Force validator initialization (lazy fields)
+        _ = validator.ToString();
+
+        var memoryAfter = GC.GetTotalMemory(forceFullCollection: false);
+        var memoryUsed = memoryAfter - memoryBefore;
+
+        // Assert - Memory overhead should be under 5MB (Spec 003 SC-004)
+        var memoryUsedMB = memoryUsed / (1024.0 * 1024.0);
+        Assert.True(memoryUsedMB < 5.0, 
+            $"Service overhead is {memoryUsedMB:F2} MB, expected < 5 MB");
+    }
+
     private static LicenseValidator CreateValidator(DateTimeOffset nowUtc)
     {
         var schemaValidator = new ProofEnvelopeSchemaValidator();

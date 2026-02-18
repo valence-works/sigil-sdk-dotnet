@@ -184,6 +184,41 @@ public sealed class LicenseValidatorTests
         Assert.Equal(LicenseFailureCode.SchemaValidationFailed, result.Failure?.Code);
     }
 
+    [Fact]
+    public async Task ValidateAsync_CustomVerifierAndHandler_AreInvoked()
+    {
+        // Spec 003 (US3 acceptance scenario)
+        var schemaValidator = new FakeSchemaValidator(isValid: true);
+        var verifier = new CountingVerifier(verifyResult: true);
+        var handler = new CountingStatementHandler(isValid: true);
+
+        var proofRegistry = new ImmutableProofSystemRegistry(
+            new[] { new KeyValuePair<string, IProofSystemVerifier>("custom", verifier) });
+        var statementRegistry = new ImmutableStatementRegistry(
+            new[] { new KeyValuePair<string, IStatementHandler>("custom", handler) });
+
+        var validator = new LicenseValidator(
+            schemaValidator,
+            proofRegistry,
+            statementRegistry,
+            new FixedClock(DateTimeOffset.UnixEpoch),
+            new ValidationOptions { EnableDiagnostics = true });
+
+        var input = "{" 
+                    + "\"envelopeVersion\":\"1.0\"," 
+                    + "\"proofSystem\":\"custom\"," 
+                    + "\"statementId\":\"custom\"," 
+                    + "\"proofBytes\":\"AA==\"," 
+                    + "\"publicInputs\":{}" 
+                    + "}";
+
+        var result = await validator.ValidateAsync(input);
+
+        Assert.Equal(LicenseStatus.Valid, result.Status);
+        Assert.Equal(1, verifier.CallCount);
+        Assert.Equal(1, handler.CallCount);
+    }
+
     private static LicenseValidator CreateValidator(bool schemaValid)
     {
         var schemaValidator = new FakeSchemaValidator(schemaValid);
@@ -247,6 +282,46 @@ public sealed class LicenseValidatorTests
 
         public Task<StatementValidationResult> ValidateAsync(JsonElement publicInputs, CancellationToken cancellationToken = default)
         {
+            return Task.FromResult(new StatementValidationResult(isValid, claims: isValid ? new LicenseClaims() : null));
+        }
+    }
+
+    private sealed class CountingVerifier : IProofSystemVerifier
+    {
+        private readonly bool verifyResult;
+
+        public CountingVerifier(bool verifyResult)
+        {
+            this.verifyResult = verifyResult;
+        }
+
+        public int CallCount { get; private set; }
+
+        public Task<bool> VerifyAsync(
+            string statementId,
+            JsonElement publicInputs,
+            ReadOnlyMemory<byte> proofBytes,
+            CancellationToken cancellationToken = default)
+        {
+            CallCount++;
+            return Task.FromResult(verifyResult);
+        }
+    }
+
+    private sealed class CountingStatementHandler : IStatementHandler
+    {
+        private readonly bool isValid;
+
+        public CountingStatementHandler(bool isValid)
+        {
+            this.isValid = isValid;
+        }
+
+        public int CallCount { get; private set; }
+
+        public Task<StatementValidationResult> ValidateAsync(JsonElement publicInputs, CancellationToken cancellationToken = default)
+        {
+            CallCount++;
             return Task.FromResult(new StatementValidationResult(isValid, claims: isValid ? new LicenseClaims() : null));
         }
     }

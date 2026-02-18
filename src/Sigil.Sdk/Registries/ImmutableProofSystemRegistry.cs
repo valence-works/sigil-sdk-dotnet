@@ -31,4 +31,15 @@ public sealed class ImmutableProofSystemRegistry : IProofSystemRegistry
     {
         return verifiers.TryGetValue(proofSystem, out verifier!);
     }
+
+    /// <summary>
+    /// Spec 003 (FR-015): Registries are immutable after container build.
+    /// This method exists only to provide a clear failure mode if mutation is attempted.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Always thrown to enforce immutability.</exception>
+    public void AddVerifier(string proofSystem, IProofSystemVerifier verifier)
+    {
+        throw new InvalidOperationException(
+            "Registries are immutable after container build (Spec 003 FR-015). Use ValidationOptions during registration.");
+    }
 }
