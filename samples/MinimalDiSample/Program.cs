@@ -18,11 +18,24 @@ public class Program
                         // Spec 003 (FR-001): Single line registration with defaults
                         services.AddSigilValidation();
 
-                        // Optional: Uncomment to add custom configuration
+                        // Optional: Production diagnostics configuration (Spec 003 T023-T027)
+                        // Uncomment and customize as needed for your environment
                         // services.AddSigilValidation(options =>
                         // {
+                        //     // Enable diagnostic information collection and reporting
                         //     options.EnableDiagnostics = true;
-                        //     // Add custom proof systems or handlers here
+                        //
+                        //     // Include detailed failure messages in logs
+                        //     // WARNING: Only enable in production if logs are secure/sanitized
+                        //     options.LogFailureDetails = true;
+                        //
+                        //     // Spec 003 (T042): Register custom proof system and statement handler
+                        //     // options.AddProofSystem("custom-system", new CustomProofSystemVerifier());
+                        //     // options.AddStatementHandler(new CustomStatementHandler());
+                        //
+                        //     // Add custom proof systems or statement handlers here
+                        //     // options.AddProofSystem("ps-id", verifier);
+                        //     // options.AddStatementHandler(handler);
                         // });
 
                         services.AddControllers();

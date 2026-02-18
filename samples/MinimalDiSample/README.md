@@ -94,36 +94,130 @@ public class ValidationController : ControllerBase
 
 ## Customization
 
-### Add Custom Proof Systems
+### Extending with Custom Proof Systems
 
-In Program.cs, customize the setup:
+Register custom proof system verifiers during the initial `AddSigilValidation()` call:
 
 ```csharp
 builder.Services.AddSigilValidation(options =>
 {
+    // Register custom proof systems by identifier
     options.AddProofSystem("paillier", new PaillierVerifier());
     options.AddProofSystem("groth16", new Groth16Verifier());
+    options.AddProofSystem("custom-zkp", new CustomZkpVerifier());
 });
 ```
 
-### Add Custom Statement Handlers
+**Important Notes**:
+- Proof system identifiers must be **non-empty, non-whitespace strings**
+- **Duplicate identifiers are not allowed** - calling `AddProofSystem()` with the same identifier twice throws `ArgumentException`
+- Verifiers are registered in an **immutable registry** after container build (Spec 003 FR-015)
+- Custom verifiers must implement `IProofSystemVerifier` interface
+- Verifier instances are invoked during the validation pipeline
+
+**Error Handling**:
+```csharp
+// ❌ This will throw ArgumentException (duplicate identifier)
+options.AddProofSystem("groth16", verifier1);
+options.AddProofSystem("groth16", verifier2); // Exception!
+
+// ❌ This will throw ArgumentException (empty identifier)
+options.AddProofSystem("", verifier); // Exception!
+options.AddProofSystem("   ", verifier); // Exception!
+```
+
+### Extending with Custom Statement Handlers
+
+Register custom statement handlers to validate specific statement types:
 
 ```csharp
 builder.Services.AddSigilValidation(options =>
 {
-    options.AddStatementHandler(new MyStatementHandler());
+    // Register custom handlers by statement type
+    options.AddStatementHandler(new LicenseExpiryHandler());
+    options.AddStatementHandler(new FeatureLimitHandler());
+    options.AddStatementHandler(new CustomBusinessRuleHandler());
+});
+```
+
+**Important Notes**:
+- Statement handlers must implement `IStatementHandler` interface
+- Each handler declares which statement types it handles via `HandledStatementIds` property
+- **Duplicate statement IDs are not allowed** - registering multiple handlers for the same ID throws `ArgumentException`
+- Handlers are registered in an **immutable registry** after container build (Spec 003 FR-015)
+- Handler instances are invoked during the validation pipeline
+
+**Error Handling**:
+```csharp
+// ❌ This will throw ArgumentException if both handle same statement ID
+options.AddStatementHandler(handler1); // handles "license-expiry"
+options.AddStatementHandler(handler2); // also handles "license-expiry" - Exception!
+```
+
+### Extension Point Pattern Example
+
+Complete example showing proof system and statement handler extension:
+
+```csharp
+public class CustomProofSystemVerifier : IProofSystemVerifier
+{
+    public string ProofSystemId => "custom-zkp";
+
+    public Task<bool> VerifyAsync(
+        IReadOnlyDictionary<string, object> publicInputs,
+        ReadOnlyMemory<byte> proofBytes,
+        CancellationToken cancellationToken)
+    {
+        // Implement custom proof verification logic
+        return Task.FromResult(true);
+    }
+}
+
+public class CustomStatementHandler : IStatementHandler
+{
+    public IReadOnlySet<string> HandledStatementIds => 
+        new HashSet<string> { "custom-statement" };
+
+    public Task<ValidationResult> ValidateAsync(
+        StatementData statement,
+        CancellationToken cancellationToken)
+    {
+        // Implement custom statement validation logic
+        return Task.FromResult(ValidationResult.Success());
+    }
+}
+
+// Register both in Program.cs
+builder.Services.AddSigilValidation(options =>
+{
+    options.AddProofSystem("custom-zkp", new CustomProofSystemVerifier());
+    options.AddStatementHandler(new CustomStatementHandler());
 });
 ```
 
 ### Enable Diagnostics Logging
 
+Configure diagnostic logging for production environments (Spec 003 T023-T027):
+
 ```csharp
 builder.Services.AddSigilValidation(options =>
 {
+    // Enable collection of diagnostic information
     options.EnableDiagnostics = true;
-    options.LogFailureDetails = true; // Include detailed failure info
+    
+    // Include detailed failure messages in application logs
+    // Default: false (secure default - logs only status and failure code)
+    // Set to true only in production if logs are properly secured
+    options.LogFailureDetails = true;
 });
 ```
+
+**Security Note**: By default, `LogFailureDetails` is `false`. This ensures sensitive failure details are never logged unless explicitly enabled. Only enable detailed logging in production environments where logs are:
+- Properly secured and access-controlled
+- Not exposed in error responses to clients
+- Sanitized of any sensitive data by the application layer
+
+**Best Practice**: In development, enable LogFailureDetails for detailed diagnostics. In production, only enable if logs are securely managed.
 
 ## Architecture
 

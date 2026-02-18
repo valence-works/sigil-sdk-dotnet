@@ -215,6 +215,52 @@ public class ServiceCollectionExtensionsTests
     }
 
     /// <summary>
+    /// FR-016a: Misconfigured dependencies should throw InvalidOperationException with guidance
+    /// </summary>
+    [Fact]
+    public void AddSigilValidation_MisconfiguredOptions_WrapsInvalidOperationException()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        // Act & Assert
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+        {
+            services.AddSigilValidation(options =>
+            {
+                options.AddProofSystem(" ", new MockProofSystemVerifier());
+            });
+        });
+
+        Assert.Contains("error occurred while registering Sigil validation services", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.NotNull(ex.InnerException);
+        Assert.IsType<ArgumentException>(ex.InnerException);
+    }
+
+    /// <summary>
+    /// FR-016b: Exceptions from custom verifiers during registration should be wrapped
+    /// </summary>
+    [Fact]
+    public void AddSigilValidation_CustomVerifierConstructionThrows_WrapsInvalidOperationException()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        // Act & Assert
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+        {
+            services.AddSigilValidation(options =>
+            {
+                options.AddProofSystem("throwing", new ThrowingVerifier());
+            });
+        });
+
+        Assert.Contains("error occurred while registering Sigil validation services", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.NotNull(ex.InnerException);
+        Assert.Contains("Verifier construction failed", ex.InnerException!.Message);
+    }
+
+    /// <summary>
     /// T013: Null safety - optional configureOptions can be null
     /// </summary>
     [Fact]
@@ -514,6 +560,181 @@ public class ServiceCollectionExtensionsTests
 
     #endregion
 
+    #region T027-T029 - Diagnostics Configuration
+
+    /// <summary>
+    /// Spec 003 (T024): LogFailureDetails can be configured during DI registration
+    /// </summary>
+    [Fact]
+    public void AddSigilValidation_CanConfigureLogFailureDetails()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        // Act - Configure LogFailureDetails to true
+        services.AddSigilValidation(options => options.LogFailureDetails = true);
+        var provider = services.BuildServiceProvider();
+
+        // Assert - Options should have LogFailureDetails set
+        var registeredOptions = provider.GetService<ValidationOptions>();
+        Assert.NotNull(registeredOptions);
+        Assert.True(registeredOptions.LogFailureDetails);
+    }
+
+    /// <summary>
+    /// Spec 003 (T024): LogFailureDetails defaults to false (secure default)
+    /// </summary>
+    [Fact]
+    public void AddSigilValidation_LogFailureDetailsDefaultsToFalse()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        // Act
+        services.AddSigilValidation();
+        var provider = services.BuildServiceProvider();
+
+        // Assert - Secure default is false
+        var options = provider.GetService<ValidationOptions>();
+        Assert.NotNull(options);
+        Assert.False(options.LogFailureDetails);
+    }
+
+    /// <summary>
+    /// Spec 003 (T025): EnableDiagnostics can be configured during DI registration
+    /// </summary>
+    [Fact]
+    public void AddSigilValidation_CanConfigureEnableDiagnostics()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        // Act - Configure EnableDiagnostics to true
+        services.AddSigilValidation(options => options.EnableDiagnostics = true);
+        var provider = services.BuildServiceProvider();
+
+        // Assert - Options should have EnableDiagnostics set
+        var registeredOptions = provider.GetService<ValidationOptions>();
+        Assert.NotNull(registeredOptions);
+        Assert.True(registeredOptions.EnableDiagnostics);
+    }
+
+    /// <summary>
+    /// Spec 003 (T025): EnableDiagnostics defaults to false (secure default)
+    /// </summary>
+    [Fact]
+    public void AddSigilValidation_EnableDiagnosticsDefaultsToFalse()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        // Act
+        services.AddSigilValidation();
+        var provider = services.BuildServiceProvider();
+
+        // Assert - Secure default is false
+        var options = provider.GetService<ValidationOptions>();
+        Assert.NotNull(options);
+        Assert.False(options.EnableDiagnostics);
+    }
+
+    /// <summary>
+    /// Spec 003 (T026): Multiple diagnostics options can be configured together
+    /// </summary>
+    [Fact]
+    public void AddSigilValidation_CanConfigureMultipleDiagnosticsOptions()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        // Act - Configure both options
+        services.AddSigilValidation(options =>
+        {
+            options.EnableDiagnostics = true;
+            options.LogFailureDetails = true;
+        });
+        var provider = services.BuildServiceProvider();
+
+        // Assert - Both options set correctly
+        var registeredOptions = provider.GetService<ValidationOptions>();
+        Assert.NotNull(registeredOptions);
+        Assert.True(registeredOptions.EnableDiagnostics);
+        Assert.True(registeredOptions.LogFailureDetails);
+    }
+
+    /// <summary>
+    /// Spec 003 (T027): Diagnostics configuration doesn't affect core validation
+    /// Verifies that enabling diagnostics doesn't prevent validation from working
+    /// </summary>
+    [Fact]
+    public void AddSigilValidation_DiagnosticsConfigurationDoesntAffectValidation()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        // Act - Configure diagnostics
+        services.AddSigilValidation(options => options.EnableDiagnostics = true);
+        var provider = services.BuildServiceProvider();
+
+        // Assert - Validator still resolvable and is singleton
+        var validator1 = provider.GetService<ILicenseValidator>();
+        var validator2 = provider.GetService<ILicenseValidator>();
+        
+        Assert.NotNull(validator1);
+        Assert.NotNull(validator2);
+        Assert.Same(validator1, validator2);
+    }
+
+    #endregion
+
+    #region T047 - Registry Immutability Tests
+
+    /// <summary>
+    /// T047: Verify runtime modification of ImmutableProofSystemRegistry throws InvalidOperationException
+    /// Spec 003 (FR-015): Registries are immutable after container build
+    /// </summary>
+    [Fact]
+    public void ImmutableProofSystemRegistry_AddVerifier_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSigilValidation();
+        var provider = services.BuildServiceProvider();
+        var registry = (ImmutableProofSystemRegistry)provider.GetRequiredService<IProofSystemRegistry>();
+
+        // Act & Assert
+        var ex = Assert.Throws<InvalidOperationException>(() => 
+            registry.AddVerifier("new-system", new MockProofSystemVerifier()));
+        
+        Assert.Contains("immutable after container build", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Spec 003 FR-015", ex.Message);
+        Assert.Contains("ValidationOptions", ex.Message);
+    }
+
+    /// <summary>
+    /// T047: Verify runtime modification of ImmutableStatementRegistry throws InvalidOperationException
+    /// Spec 003 (FR-015): Registries are immutable after container build
+    /// </summary>
+    [Fact]
+    public void ImmutableStatementRegistry_AddHandler_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSigilValidation();
+        var provider = services.BuildServiceProvider();
+        var registry = (ImmutableStatementRegistry)provider.GetRequiredService<IStatementRegistry>();
+
+        // Act & Assert
+        var ex = Assert.Throws<InvalidOperationException>(() => 
+            registry.AddHandler("new-statement", new MockStatementHandler()));
+        
+        Assert.Contains("immutable after container build", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Spec 003 FR-015", ex.Message);
+        Assert.Contains("ValidationOptions", ex.Message);
+    }
+
+    #endregion
+
     #region Test Helpers
 
     /// <summary>
@@ -541,6 +762,23 @@ public class ServiceCollectionExtensionsTests
             CancellationToken cancellationToken = default)
         {
             return Task.FromResult(new StatementValidationResult(true, null));
+        }
+    }
+
+    private sealed class ThrowingVerifier : IProofSystemVerifier
+    {
+        public ThrowingVerifier()
+        {
+            throw new InvalidOperationException("Verifier construction failed.");
+        }
+
+        public Task<bool> VerifyAsync(
+            string statementId,
+            System.Text.Json.JsonElement publicInputs,
+            ReadOnlyMemory<byte> proofBytes,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(false);
         }
     }
 

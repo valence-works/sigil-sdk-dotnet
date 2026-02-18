@@ -181,7 +181,7 @@ public sealed class LicenseValidator : ILicenseValidator
                 claims: statementResult.Claims,
                 failure: null);
 
-            ValidationLogging.LogValidationResult(logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance, result);
+            ValidationLogging.LogValidationResult(logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance, result, options);
             return result;
         }
         catch (OperationCanceledException)
@@ -224,7 +224,7 @@ public sealed class LicenseValidator : ILicenseValidator
             claims: null,
             failure: failure);
 
-        ValidationLogging.LogValidationResult(logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance, result);
+        ValidationLogging.LogValidationResult(logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance, result, options);
         return result;
     }
 
