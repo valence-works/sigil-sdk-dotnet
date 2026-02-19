@@ -110,6 +110,7 @@ As an architect, I want the specification to clarify that expiry evaluation is p
 - **FR-003**: The handler contract MUST specify which validation checks belong to the handler (shape/type validation, statement-specific rules) versus which belong to the validator (schema validation, expiry evaluation).
 - **FR-004**: Statement handlers MUST use immutable registries registered via DI, preventing runtime modifications to the validation logic after startup.
 - **FR-005**: The specification MUST document the failure modes and error conditions that a statement handler can report when `publicInputs` validation fails.
+- **FR-005A**: Each statement handler MUST expose a canonical `StatementId` (URN), and statement registry keys MUST be derived from that `StatementId` to prevent ambiguous or duplicate registrations.
 
 #### license:v1 Statement Definition
 
