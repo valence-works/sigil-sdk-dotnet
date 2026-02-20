@@ -443,12 +443,12 @@ public class ServiceCollectionExtensionsTests
 
         // Assert
         Assert.NotNull(registry);
-        // Handler should be in the registry (keyed by index internally)
-        Assert.True(registry.TryGetHandler("handler_0", out var handler));
+        // Handler should be in the registry (keyed by StatementId)
+        Assert.True(registry.TryGetHandler(mockHandler.StatementId, out var handler));
     }
 
     /// <summary>
-    /// FR-008: Duplicate statement handler type throws InvalidOperationException
+    /// FR-008: Duplicate statement handler ID throws InvalidOperationException
     /// </summary>
     [Fact]
     public void AddSigilValidation_DuplicateStatementHandlerTypeThrows()
@@ -469,7 +469,7 @@ public class ServiceCollectionExtensionsTests
         });
 
         Assert.Contains("already registered", ex.Message);
-        Assert.Contains("Spec 003", ex.Message);
+        Assert.Contains("Spec 004", ex.Message);
     }
 
     #endregion
@@ -513,7 +513,7 @@ public class ServiceCollectionExtensionsTests
         };
         var handlers = new Dictionary<string, IStatementHandler>
         {
-            { "legacy-handler", new MockStatementHandler() }
+            { "legacy-handler", new MockStatementHandler("legacy-handler") }
         };
 
         // Act - Use legacy overload
@@ -757,11 +757,27 @@ public class ServiceCollectionExtensionsTests
     /// </summary>
     private class MockStatementHandler : IStatementHandler
     {
+        public MockStatementHandler(string? statementId = null)
+        {
+            StatementId = string.IsNullOrWhiteSpace(statementId)
+                ? "urn:example:statement:mock"
+                : statementId;
+        }
+
+        public string StatementId { get; }
+
         public Task<StatementValidationResult> ValidateAsync(
             System.Text.Json.JsonElement publicInputs,
             CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(new StatementValidationResult(true, null));
+            var claims = new LicenseClaims(
+                productId: "product",
+                edition: "edition",
+                features: new[] { "feature-a" },
+                expiresAt: 1,
+                maxSeats: 1,
+                issuedAt: 1);
+            return Task.FromResult(new StatementValidationResult(true, claims));
         }
     }
 

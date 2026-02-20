@@ -98,7 +98,7 @@ public sealed class ValidationPerformanceBenchmarks
         var proofRegistry = new ImmutableProofSystemRegistry(
             new[] { new KeyValuePair<string, IProofSystemVerifier>("test", verifier) });
         var statementRegistry = new ImmutableStatementRegistry(
-            new[] { new KeyValuePair<string, IStatementHandler>("sigil:license", handler) });
+            new[] { new KeyValuePair<string, IStatementHandler>(StatementIds.LicenseV1, handler) });
 
         return new LicenseValidator(
             schemaValidator,
@@ -118,7 +118,7 @@ public sealed class ValidationPerformanceBenchmarks
         {
             envelopeVersion = "1.0",
             proofSystem = "test",
-            statementId = "sigil:license",
+            statementId = StatementIds.LicenseV1,
             proofBytes = "AA==",
             publicInputs = new
             {
@@ -149,9 +149,18 @@ public sealed class ValidationPerformanceBenchmarks
 
     private sealed class AlwaysValidStatementHandler : IStatementHandler
     {
+        public string StatementId => StatementIds.LicenseV1;
+
         public Task<StatementValidationResult> ValidateAsync(JsonElement publicInputs, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(new StatementValidationResult(isValid: true, claims: new LicenseClaims()));
+            var claims = new LicenseClaims(
+                productId: "product",
+                edition: "edition",
+                features: new[] { "feature-a" },
+                expiresAt: 1,
+                maxSeats: 1,
+                issuedAt: 1);
+            return Task.FromResult(new StatementValidationResult(isValid: true, claims: claims));
         }
     }
 

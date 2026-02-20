@@ -9,7 +9,7 @@ public static class ValidationPipeline
     public const string Schema = "schema";
     public const string RegistryResolution = "registry";
     public const string ProofVerification = "crypto";
-    public const string StatementValidation = "semantic";
-    public const string ExpiryEvaluation = "expiry";
+    public const string StatementValidation = "semantic"; // Statement handler validation using public inputs.
+    public const string ExpiryEvaluation = "expiry"; // Expiry check using validated claim values.
     public const string InternalError = "error";
 }

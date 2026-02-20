@@ -23,13 +23,14 @@ public sealed class CustomStatementHandler : IStatementHandler
             return Task.FromResult(new StatementValidationResult(false, null));
         }
 
+        var now = DateTimeOffset.UtcNow;
         var claims = new LicenseClaims(
             productId: "demo-product",
             edition: "pro",
             features: new[] { "offline-validation" },
-            expiresAt: DateTimeOffset.UtcNow.AddDays(30),
+            expiresAt: now.AddDays(30).ToUnixTimeSeconds(),
             maxSeats: 10,
-            issuedAt: DateTimeOffset.UtcNow);
+            issuedAt: now.ToUnixTimeSeconds());
 
         return Task.FromResult(new StatementValidationResult(true, claims));
     }

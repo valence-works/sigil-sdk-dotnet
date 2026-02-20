@@ -15,8 +15,8 @@ public sealed class LicenseValidatorCryptoTests
     public async Task CryptoFailure_ReturnsInvalid_NotExpired_EvenIfExpiresAtIsPast()
     {
         // Spec 002 (FR-008a, FR-016)
-        var validator = CreateValidator(verifierResult: false, handlerValid: true, nowUtc: DateTimeOffset.Parse("2030-01-01T00:00:00Z"));
-        var input = EnvelopeJson(expiresAt: "2000-01-01T00:00:00Z");
+        var validator = CreateValidator(verifierResult: false, handlerValid: true, nowUtc: DateTimeOffset.Parse("2030-01-01T00:00:00Z"), expiresAtUnix: 1);
+        var input = EnvelopeJson(expiresAt: 1);
 
         var result = await validator.ValidateAsync(input);
 
@@ -28,8 +28,8 @@ public sealed class LicenseValidatorCryptoTests
     public async Task VerifiedExpired_ReturnsExpired_AfterVerification()
     {
         // Spec 002 (FR-008b, SC-003)
-        var validator = CreateValidator(verifierResult: true, handlerValid: true, nowUtc: DateTimeOffset.Parse("2030-01-01T00:00:00Z"));
-        var input = EnvelopeJson(expiresAt: "2000-01-01T00:00:00Z");
+        var validator = CreateValidator(verifierResult: true, handlerValid: true, nowUtc: DateTimeOffset.Parse("2030-01-01T00:00:00Z"), expiresAtUnix: 1);
+        var input = EnvelopeJson(expiresAt: 1);
 
         var result = await validator.ValidateAsync(input);
 
@@ -37,12 +37,12 @@ public sealed class LicenseValidatorCryptoTests
         Assert.Equal(LicenseFailureCode.LicenseExpired, result.Failure?.Code);
     }
 
-    private static LicenseValidator CreateValidator(bool verifierResult, bool handlerValid, DateTimeOffset nowUtc)
+    private static LicenseValidator CreateValidator(bool verifierResult, bool handlerValid, DateTimeOffset nowUtc, long expiresAtUnix)
     {
         var schemaValidator = new AlwaysValidSchemaValidator();
 
         var verifier = new FakeVerifier(verifierResult);
-        var handler = new FakeStatementHandler(handlerValid);
+        var handler = new FakeStatementHandler(handlerValid, expiresAtUnix);
 
         var proofRegistry = new ImmutableProofSystemRegistry(
             new[] { new KeyValuePair<string, IProofSystemVerifier>("test", verifier) });
@@ -57,9 +57,9 @@ public sealed class LicenseValidatorCryptoTests
             new ValidationOptions { EnableDiagnostics = true });
     }
 
-    private static string EnvelopeJson(string? expiresAt)
+    private static string EnvelopeJson(long? expiresAt)
     {
-        var expiresAtFragment = expiresAt is null ? "" : $", \"expiresAt\": \"{expiresAt}\"";
+        var expiresAtFragment = expiresAt is null ? "" : $", \"expiresAt\": {expiresAt}";
         return "{"
                + "\"envelopeVersion\":\"1.0\"," 
                + "\"proofSystem\":\"test\"," 
@@ -99,15 +99,22 @@ public sealed class LicenseValidatorCryptoTests
     private sealed class FakeStatementHandler : IStatementHandler
     {
         private readonly bool isValid;
+        private readonly long expiresAtUnix;
 
-        public FakeStatementHandler(bool isValid)
+        public FakeStatementHandler(bool isValid, long expiresAtUnix)
         {
             this.isValid = isValid;
+            this.expiresAtUnix = expiresAtUnix;
         }
+
+        public string StatementId => "test";
 
         public Task<StatementValidationResult> ValidateAsync(JsonElement publicInputs, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(new StatementValidationResult(isValid, isValid ? new LicenseClaims() : null));
+            var claims = isValid
+                ? new LicenseClaims("product", "edition", new[] { "feature-a" }, expiresAtUnix, maxSeats: 1)
+                : null;
+            return Task.FromResult(new StatementValidationResult(isValid, claims));
         }
     }
 

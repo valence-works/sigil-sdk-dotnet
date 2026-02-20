@@ -7,6 +7,11 @@ namespace Sigil.Sdk.Statements;
 
 public interface IStatementHandler
 {
+    /// <summary>
+    /// Gets the canonical statement identifier (URN) handled by this instance.
+    /// </summary>
+    string StatementId { get; }
+
     Task<StatementValidationResult> ValidateAsync(
         JsonElement publicInputs,
         CancellationToken cancellationToken = default);

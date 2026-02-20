@@ -321,6 +321,11 @@ builder.Services.AddSigilValidation(options =>
    - SDK automatically enforces this constraint (Spec 003 FR-016)
    - Application layer should sanitize any custom logging
 
+4. **Statement Handler Logging Hygiene**
+    - Custom statement handlers MUST avoid logging full `publicInputs`
+    - If logging is needed, log only derived, non-sensitive fields
+    - Deterministic handlers improve auditability and reproducibility
+
 ### Performance
 
 1. **Schema Compilation is Automatic**
@@ -411,7 +416,7 @@ if (proofRegistry.TryGetVerifier("groth16", out var verifier))
 }
 
 var statementRegistry = provider.GetRequiredService<IStatementRegistry>();
-if (statementRegistry.TryGetHandler("license-expiry", out var handler))
+if (statementRegistry.TryGetHandler(StatementIds.LicenseV1, out var handler))
 {
     // Handler is registered
 }

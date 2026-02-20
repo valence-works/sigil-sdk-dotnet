@@ -18,6 +18,16 @@ public sealed class ImmutableStatementRegistry : IStatementRegistry
         var dict = new Dictionary<string, IStatementHandler>(StringComparer.Ordinal);
         foreach (var kvp in handlers)
         {
+            if (string.IsNullOrWhiteSpace(kvp.Key))
+            {
+                throw new ArgumentException("Statement registry key cannot be null or whitespace.", nameof(handlers));
+            }
+
+            if (kvp.Value is null)
+            {
+                throw new ArgumentException("Statement handler cannot be null.", nameof(handlers));
+            }
+
             if (!dict.TryAdd(kvp.Key, kvp.Value))
             {
                 throw new ArgumentException($"Duplicate statement registry key '{kvp.Key}'.", nameof(handlers));

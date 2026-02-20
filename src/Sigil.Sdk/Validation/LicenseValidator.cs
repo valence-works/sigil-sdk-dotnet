@@ -151,6 +151,7 @@ public sealed class LicenseValidator : ILicenseValidator
             }
 
             // Stage 6: Statement semantic validation.
+            cancellationToken.ThrowIfCancellationRequested();
             var statementResult = await handler
                 .ValidateAsync(publicInputs, cancellationToken)
                 .ConfigureAwait(false);
@@ -160,17 +161,25 @@ public sealed class LicenseValidator : ILicenseValidator
                 return Fail(LicenseFailureCode.StatementValidationFailed, readResult, diagnosticException: null);
             }
 
-            // Stage 7: Expiry evaluation (FR-008) - only after successful verification.
-            if (TryGetExpiresAtUtc(publicInputs, out var expiresAtUtc, out var expiresAtPresentButInvalid))
+            if (statementResult.Claims is null)
             {
-                if (expiresAtUtc < clock.UtcNow)
-                {
-                    return Fail(LicenseFailureCode.LicenseExpired, readResult, diagnosticException: null);
-                }
+                return Fail(LicenseFailureCode.StatementValidationFailed, readResult, diagnosticException: null);
             }
-            else if (expiresAtPresentButInvalid)
+
+            // Stage 7: Expiry evaluation (FR-008) - only after successful verification.
+            DateTimeOffset expiresAtUtc;
+            try
+            {
+                expiresAtUtc = DateTimeOffset.FromUnixTimeSeconds(statementResult.Claims.ExpiresAt);
+            }
+            catch (ArgumentOutOfRangeException)
             {
                 return Fail(LicenseFailureCode.ExpiresAtInvalid, readResult, diagnosticException: null);
+            }
+
+            if (expiresAtUtc < clock.UtcNow)
+            {
+                return Fail(LicenseFailureCode.LicenseExpired, readResult, diagnosticException: null);
             }
 
             var result = new LicenseValidationResult(
@@ -226,44 +235,6 @@ public sealed class LicenseValidator : ILicenseValidator
 
         ValidationLogging.LogValidationResult(logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance, result, options);
         return result;
-    }
-
-    private static bool TryGetExpiresAtUtc(JsonElement publicInputs, out DateTimeOffset expiresAtUtc, out bool presentButInvalid)
-    {
-        expiresAtUtc = default;
-        presentButInvalid = false;
-
-        if (publicInputs.ValueKind != JsonValueKind.Object)
-        {
-            return false;
-        }
-
-        if (!publicInputs.TryGetProperty("expiresAt", out var expiresAtProp))
-        {
-            return false;
-        }
-
-        if (expiresAtProp.ValueKind != JsonValueKind.String)
-        {
-            presentButInvalid = true;
-            return false;
-        }
-
-        var s = expiresAtProp.GetString();
-        if (string.IsNullOrWhiteSpace(s))
-        {
-            presentButInvalid = true;
-            return false;
-        }
-
-        var parsed = DateTimeOffset.TryParse(
-            s,
-            null,
-            System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal,
-            out expiresAtUtc);
-
-        presentButInvalid = !parsed;
-        return parsed;
     }
 
     private sealed class StreamReadException : Exception

@@ -71,16 +71,16 @@ public sealed class LicenseValidatorTests
             new ValidationOptions { EnableDiagnostics = true });
 
         var input = "{"
-                    + "\"envelopeVersion\":\"1.0\"," 
-                    + "\"proofSystem\":\"test\"," 
-                    + "\"statementId\":\"sigil:license\"," 
-                    + "\"proofBytes\":\"AA==\"," 
-                    + "\"publicInputs\":{"
-                    + "\"productId\":\"p\"," 
-                    + "\"edition\":\"e\"," 
-                    + "\"features\":[\"feature-a\"]"
-                    + "}"
-                    + "}";
+                + "\"envelopeVersion\":\"1.0\"," 
+                + "\"proofSystem\":\"test\"," 
+                + $"\"statementId\":\"{StatementIds.LicenseV1}\"," 
+                + "\"proofBytes\":\"AA==\"," 
+                + "\"publicInputs\":{" 
+                + "\"productId\":\"p\"," 
+                + "\"edition\":\"e\"," 
+                + "\"features\":[\"feature-a\"]"
+                + "}"
+                + "}";
 
         var result = await validator.ValidateAsync(input);
 
@@ -107,16 +107,16 @@ public sealed class LicenseValidatorTests
             new ValidationOptions { EnableDiagnostics = true });
 
         var input = "{"
-                    + "\"envelopeVersion\":\"1.0\"," 
-                    + "\"proofSystem\":\"test\"," 
-                    + "\"statementId\":\"sigil:unknown\"," 
-                    + "\"proofBytes\":\"AA==\"," 
-                    + "\"publicInputs\":{"
-                    + "\"productId\":\"p\"," 
-                    + "\"edition\":\"e\"," 
-                    + "\"features\":[\"feature-a\"]"
-                    + "}"
-                    + "}";
+                + "\"envelopeVersion\":\"1.0\"," 
+                + "\"proofSystem\":\"test\"," 
+                + "\"statementId\":\"sigil:unknown\"," 
+                + "\"proofBytes\":\"AA==\"," 
+                + "\"publicInputs\":{" 
+                + "\"productId\":\"p\"," 
+                + "\"edition\":\"e\"," 
+                + "\"features\":[\"feature-a\"]"
+                + "}"
+                + "}";
 
         var result = await validator.ValidateAsync(input);
 
@@ -130,12 +130,12 @@ public sealed class LicenseValidatorTests
         // Spec 002 (US3 acceptance scenario)
         var schemaValidator = new FakeSchemaValidator(isValid: true);
         var verifier = new FakeVerifier(verifyResult: true);
-        var handler = new FakeStatementHandler(isValid: true);
+        var handler = new FakeStatementHandler(statementId: StatementIds.LicenseV1, isValid: true);
 
         var proofRegistry = new ImmutableProofSystemRegistry(
             new[] { new KeyValuePair<string, IProofSystemVerifier>("test", verifier) });
         var statementRegistry = new ImmutableStatementRegistry(
-            new[] { new KeyValuePair<string, IStatementHandler>("sigil:license", handler) });
+            new[] { new KeyValuePair<string, IStatementHandler>(StatementIds.LicenseV1, handler) });
 
         var validator = new LicenseValidator(
             schemaValidator,
@@ -145,16 +145,16 @@ public sealed class LicenseValidatorTests
             new ValidationOptions { EnableDiagnostics = true });
 
         var input = "{"
-                    + "\"envelopeVersion\":\"2.0\"," 
-                    + "\"proofSystem\":\"test\"," 
-                    + "\"statementId\":\"sigil:license\"," 
-                    + "\"proofBytes\":\"AA==\"," 
-                    + "\"publicInputs\":{"
-                    + "\"productId\":\"p\"," 
-                    + "\"edition\":\"e\"," 
-                    + "\"features\":[\"feature-a\"]"
-                    + "}"
-                    + "}";
+                + "\"envelopeVersion\":\"2.0\"," 
+                + "\"proofSystem\":\"test\"," 
+                + $"\"statementId\":\"{StatementIds.LicenseV1}\"," 
+                + "\"proofBytes\":\"AA==\"," 
+                + "\"publicInputs\":{" 
+                + "\"productId\":\"p\"," 
+                + "\"edition\":\"e\"," 
+                + "\"features\":[\"feature-a\"]"
+                + "}"
+                + "}";
 
         var result = await validator.ValidateAsync(input);
 
@@ -190,7 +190,7 @@ public sealed class LicenseValidatorTests
         // Spec 003 (US3 acceptance scenario)
         var schemaValidator = new FakeSchemaValidator(isValid: true);
         var verifier = new CountingVerifier(verifyResult: true);
-        var handler = new CountingStatementHandler(isValid: true);
+        var handler = new CountingStatementHandler(statementId: "custom", isValid: true);
 
         var proofRegistry = new ImmutableProofSystemRegistry(
             new[] { new KeyValuePair<string, IProofSystemVerifier>("custom", verifier) });
@@ -224,7 +224,7 @@ public sealed class LicenseValidatorTests
         var schemaValidator = new FakeSchemaValidator(schemaValid);
 
         var verifier = new FakeVerifier(verifyResult: true);
-        var handler = new FakeStatementHandler(isValid: true);
+        var handler = new FakeStatementHandler(statementId: "test", isValid: true);
 
         var proofRegistry = new ImmutableProofSystemRegistry(
             new[] { new KeyValuePair<string, IProofSystemVerifier>("test", verifier) });
@@ -273,16 +273,21 @@ public sealed class LicenseValidatorTests
 
     private sealed class FakeStatementHandler : IStatementHandler
     {
+        private readonly string statementId;
         private readonly bool isValid;
 
-        public FakeStatementHandler(bool isValid)
+        public FakeStatementHandler(string statementId, bool isValid)
         {
+            this.statementId = statementId;
             this.isValid = isValid;
         }
 
+        public string StatementId => statementId;
+
         public Task<StatementValidationResult> ValidateAsync(JsonElement publicInputs, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(new StatementValidationResult(isValid, claims: isValid ? new LicenseClaims() : null));
+            var claims = isValid ? CreateClaims(expiresAt: 1) : null;
+            return Task.FromResult(new StatementValidationResult(isValid, claims: claims));
         }
     }
 
@@ -310,20 +315,36 @@ public sealed class LicenseValidatorTests
 
     private sealed class CountingStatementHandler : IStatementHandler
     {
+        private readonly string statementId;
         private readonly bool isValid;
 
-        public CountingStatementHandler(bool isValid)
+        public CountingStatementHandler(string statementId, bool isValid)
         {
+            this.statementId = statementId;
             this.isValid = isValid;
         }
+
+        public string StatementId => statementId;
 
         public int CallCount { get; private set; }
 
         public Task<StatementValidationResult> ValidateAsync(JsonElement publicInputs, CancellationToken cancellationToken = default)
         {
             CallCount++;
-            return Task.FromResult(new StatementValidationResult(isValid, claims: isValid ? new LicenseClaims() : null));
+            var claims = isValid ? CreateClaims(expiresAt: 1) : null;
+            return Task.FromResult(new StatementValidationResult(isValid, claims: claims));
         }
+    }
+
+    private static LicenseClaims CreateClaims(long expiresAt)
+    {
+        return new LicenseClaims(
+            productId: "product",
+            edition: "edition",
+            features: new[] { "feature-a" },
+            expiresAt: expiresAt,
+            maxSeats: 1,
+            issuedAt: 1);
     }
 
     private sealed class FixedClock : IClock

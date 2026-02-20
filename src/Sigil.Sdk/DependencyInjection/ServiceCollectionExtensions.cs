@@ -129,6 +129,7 @@ public static class ServiceCollectionExtensions
 
             // Create and configure options
             var options = new ValidationOptions();
+            options.AddStatementHandler(new LicenseV1StatementHandler());
             configureOptions?.Invoke(options);
 
             // Spec 003 (FR-010): Production-ready defaults
@@ -143,8 +144,7 @@ public static class ServiceCollectionExtensions
                 new ImmutableProofSystemRegistry(options.ProofSystems));
 
             services.AddSingleton<IStatementRegistry>(_ =>
-                new ImmutableStatementRegistry(options.StatementHandlers.Select((handler, index) =>
-                    new KeyValuePair<string, IStatementHandler>($"handler_{index}", handler))));
+                new ImmutableStatementRegistry(options.StatementHandlers));
 
             // Register clock abstraction
             services.AddSingleton<IClock, SystemClock>();

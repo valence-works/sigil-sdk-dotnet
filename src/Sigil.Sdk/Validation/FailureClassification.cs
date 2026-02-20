@@ -4,6 +4,13 @@ namespace Sigil.Sdk.Validation;
 
 public static class FailureClassification
 {
+    static FailureClassification()
+    {
+        System.Diagnostics.Debug.Assert(
+            MapStatus(LicenseFailureCode.LicenseExpired) == LicenseStatus.Expired,
+            "LicenseExpired must map to LicenseStatus.Expired.");
+    }
+
     public static LicenseStatus MapStatus(LicenseFailureCode code)
     {
         return code switch
@@ -17,6 +24,7 @@ public static class FailureClassification
             LicenseFailureCode.UnsupportedStatement => LicenseStatus.Unsupported,
 
             LicenseFailureCode.ProofVerificationFailed => LicenseStatus.Invalid,
+            // StatementValidationFailed covers semantic validation and statement contract violations.
             LicenseFailureCode.StatementValidationFailed => LicenseStatus.Invalid,
 
             LicenseFailureCode.LicenseExpired => LicenseStatus.Expired,
@@ -42,7 +50,7 @@ public static class FailureClassification
             LicenseFailureCode.ProofVerificationFailed => "Cryptographic verification failed.",
             LicenseFailureCode.StatementValidationFailed => "Statement validation failed.",
             LicenseFailureCode.LicenseExpired => "License is expired.",
-            LicenseFailureCode.ExpiresAtInvalid => "expiresAt is not a valid date-time.",
+            LicenseFailureCode.ExpiresAtInvalid => "expiresAt is not a valid unix timestamp.",
             LicenseFailureCode.StreamReadFailed => "Failed to read input stream.",
             _ => "Internal validation error.",
         };

@@ -27,7 +27,7 @@ namespace Sigil.Sdk.Validation;
 public sealed class ValidationOptions
 {
     private readonly Dictionary<string, IProofSystemVerifier> proofSystems = new(StringComparer.Ordinal);
-    private readonly List<IStatementHandler> statementHandlers = new();
+    private readonly Dictionary<string, IStatementHandler> statementHandlers = new(StringComparer.Ordinal);
 
     /// <summary>
     /// Gets or sets whether diagnostics are enabled during validation.
@@ -48,9 +48,9 @@ public sealed class ValidationOptions
     internal IEnumerable<KeyValuePair<string, IProofSystemVerifier>> ProofSystems => proofSystems;
 
     /// <summary>
-    /// Gets an enumerable of registered custom statement handlers.
+    /// Gets an enumerable of registered custom statement handlers keyed by statement ID.
     /// </summary>
-    internal IEnumerable<IStatementHandler> StatementHandlers => statementHandlers;
+    internal IEnumerable<KeyValuePair<string, IStatementHandler>> StatementHandlers => statementHandlers;
 
     /// <summary>
     /// Registers a custom proof system verifier with the specified identifier.
@@ -103,12 +103,11 @@ public sealed class ValidationOptions
     /// <param name="handler">Implementation of IStatementHandler</param>
     /// <returns>This instance for builder chaining</returns>
     /// <exception cref="ArgumentNullException">If handler is null</exception>
-    /// <exception cref="InvalidOperationException">If a statement handler is already registered (Spec 003 FR-008)</exception>
+    /// <exception cref="InvalidOperationException">If a statement handler with the same StatementId is already registered (Spec 004 FR-005A)</exception>
     /// <remarks>
     /// <para>
-    /// Statement handlers are stored in a collection and used during validation.
-    /// Unlike proof systems (which have unique identifiers), statement handlers are checked
-    /// for validation semantics match during validation execution.
+    /// Statement handlers are keyed by StatementId and used during validation.
+    /// Duplicate StatementId registrations are rejected to ensure deterministic routing.
     /// </para>
     /// <code>
     /// var options = new ValidationOptions()
@@ -122,15 +121,17 @@ public sealed class ValidationOptions
             throw new ArgumentNullException(nameof(handler));
         }
 
-        // Check for duplicate handler types (same type registered twice)
-        var handlerType = handler.GetType();
-        if (statementHandlers.Any(h => h.GetType() == handlerType))
+        if (string.IsNullOrWhiteSpace(handler.StatementId))
         {
-            throw new InvalidOperationException(
-                $"A statement handler of type '{handlerType.Name}' is already registered. Duplicate handler types are not allowed (Spec 003 FR-008).");
+            throw new ArgumentException("StatementId cannot be null or whitespace.", nameof(handler));
         }
 
-        statementHandlers.Add(handler);
+        if (!statementHandlers.TryAdd(handler.StatementId, handler))
+        {
+            throw new InvalidOperationException(
+                $"A statement handler with identifier '{handler.StatementId}' is already registered. Duplicate statement IDs are not allowed (Spec 004 FR-005A).");
+        }
+
         return this;
     }
 }

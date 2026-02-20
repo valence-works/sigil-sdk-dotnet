@@ -7,6 +7,8 @@ Defines normative behavior for `IStatementHandler` implementations used by the v
 ## Interface Contract
 
 ```csharp
+string StatementId { get; }
+
 Task<StatementValidationResult> ValidateAsync(
     JsonElement publicInputs,
     CancellationToken cancellationToken = default);
@@ -32,4 +34,5 @@ Task<StatementValidationResult> ValidateAsync(
 ## Registry Contract
 
 - Handler instances are resolved from immutable DI-registered statement registry.
+- Registry keys MUST be derived from `StatementId`.
 - Duplicate statement registration is a startup misconfiguration error.

@@ -102,6 +102,7 @@ Key services:
   - proof cryptographic validity
   - policy constraints encoded as public inputs
   - optional challenge/nonce rules
+   - expiry evaluation (conceptually part of statement semantics, executed after statement validation using validated claims)
 
 Return:
 - validity
@@ -184,6 +185,7 @@ The SDK provides two extension points for custom integrations:
 2. **Custom Statement Handlers** (`options.AddStatementHandler(handler)`)
    - Developers register custom validation logic for application-specific statements
    - Handlers are added to immutable registry during service registration
+   - Handlers expose a canonical `StatementId` (URN) used as the registry key
    - Duplicate statement IDs throw `ArgumentException` immediately
 
 **Immutability Enforcement**: Registries are sealed after `BuildServiceProvider()` is called. Any attempt to modify registries at runtime throws `InvalidOperationException` with clear guidance to use `ValidationOptions` during registration (Spec 003 FR-015).

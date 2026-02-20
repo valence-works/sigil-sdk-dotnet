@@ -72,8 +72,8 @@
           "uniqueItems": true
         },
         "expiresAt": {
-          "type": "string",
-          "format": "date-time"
+          "type": "integer",
+          "minimum": 1
         },
         "maxSeats": {
           "type": "integer",

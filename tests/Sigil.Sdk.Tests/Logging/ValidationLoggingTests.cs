@@ -141,7 +141,13 @@ public sealed class ValidationLoggingTests
             envelopeVersion: "1.0",
             statementId: "stmt",
             proofSystem: "ps",
-            claims: new LicenseClaims(),
+            claims: new LicenseClaims(
+                productId: "product",
+                edition: "edition",
+                features: new[] { "feature-a" },
+                expiresAt: 1,
+                maxSeats: 1,
+                issuedAt: 1),
             failure: null);
 
         // Act

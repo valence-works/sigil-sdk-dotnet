@@ -71,6 +71,8 @@ States:
 - Not expired (continues as valid path)
 - Expired (maps deterministically to `LicenseStatus.Expired` with corresponding failure code)
 
+The validator converts `ExpiresAt` (unix seconds) into UTC time for comparison.
+
 ## Relationships
 
 - One `StatementDefinition` is implemented by exactly one handler instance in registry resolution.

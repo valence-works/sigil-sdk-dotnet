@@ -17,9 +17,9 @@
 
 **Purpose**: Align feature baseline and prepare project files for Spec 004 implementation.
 
-- [ ] T001 Confirm .NET 10 build baseline and feature scope notes in specs/004-statement-handler-contract/plan.md (supports constraints + SC-007)
-- [ ] T002 Align feature quickstart runtime notes in specs/004-statement-handler-contract/quickstart.md (supports SC-007)
-- [ ] T003 [P] Verify statement contract artifacts exist and are current in specs/004-statement-handler-contract/contracts/statement-handler-contract.md (supports FR-001, FR-005)
+- [x] T001 Confirm .NET 10 build baseline and feature scope notes in specs/004-statement-handler-contract/plan.md (supports constraints + SC-007)
+- [x] T002 Align feature quickstart runtime notes in specs/004-statement-handler-contract/quickstart.md (supports SC-007)
+- [x] T003 [P] Verify statement contract artifacts exist and are current in specs/004-statement-handler-contract/contracts/statement-handler-contract.md (supports FR-001, FR-005)
 
 ---
 
@@ -29,13 +29,13 @@
 
 **⚠️ CRITICAL**: No user story work should begin until this phase is complete.
 
-- [ ] T004 Add canonical statement identifiers in src/Sigil.Sdk/Statements/StatementIds.cs
-- [ ] T005 Update statement handler contract shape (`StatementId`, result invariants, XML docs) in src/Sigil.Sdk/Statements/IStatementHandler.cs
-- [ ] T006 [P] Update statement registry API docs and lookup semantics in src/Sigil.Sdk/Registries/IStatementRegistry.cs
-- [ ] T007 Update duplicate detection and deterministic keying by statement ID in src/Sigil.Sdk/Validation/ValidationOptions.cs
-- [ ] T008 Update statement registry construction to use handler statement IDs in src/Sigil.Sdk/DependencyInjection/ServiceCollectionExtensions.cs
-- [ ] T009 Harden duplicate-key and null-handler guards in src/Sigil.Sdk/Registries/ImmutableStatementRegistry.cs
-- [ ] T010 Add/confirm deterministic failure mapping for statement contract violations in src/Sigil.Sdk/Validation/FailureClassification.cs
+- [x] T004 Add canonical statement identifiers in src/Sigil.Sdk/Statements/StatementIds.cs
+- [x] T005 Update statement handler contract shape (`StatementId`, result invariants, XML docs) in src/Sigil.Sdk/Statements/IStatementHandler.cs
+- [x] T006 [P] Update statement registry API docs and lookup semantics in src/Sigil.Sdk/Registries/IStatementRegistry.cs
+- [x] T007 Update duplicate detection and deterministic keying by statement ID in src/Sigil.Sdk/Validation/ValidationOptions.cs
+- [x] T008 Update statement registry construction to use handler statement IDs in src/Sigil.Sdk/DependencyInjection/ServiceCollectionExtensions.cs
+- [x] T009 Harden duplicate-key and null-handler guards in src/Sigil.Sdk/Registries/ImmutableStatementRegistry.cs
+- [x] T010 Add/confirm deterministic failure mapping for statement contract violations in src/Sigil.Sdk/Validation/FailureClassification.cs
 
 **Checkpoint**: Foundation ready — user stories can now proceed.
 
@@ -48,11 +48,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Enforce `IsValid=true` requires non-null claims in validation pipeline in src/Sigil.Sdk/Validation/LicenseValidator.cs
-- [ ] T012 [US1] Ensure cooperative cancellation behavior is preserved for statement handlers in src/Sigil.Sdk/Validation/LicenseValidator.cs
-- [ ] T013 [P] [US1] Clarify statement/validator responsibility boundaries in docs/architecture.md
-- [ ] T014 [P] [US1] Document custom statement handler contract and error expectations in docs/DI_INTEGRATION.md
-- [ ] T015 [US1] Align feature contract wording with implementation behavior in specs/004-statement-handler-contract/contracts/statement-handler-contract.md
+- [x] T011 [US1] Enforce `IsValid=true` requires non-null claims in validation pipeline in src/Sigil.Sdk/Validation/LicenseValidator.cs
+- [x] T012 [US1] Ensure cooperative cancellation behavior is preserved for statement handlers in src/Sigil.Sdk/Validation/LicenseValidator.cs
+- [x] T013 [P] [US1] Clarify statement/validator responsibility boundaries in docs/architecture.md
+- [x] T014 [P] [US1] Document custom statement handler contract and error expectations in docs/DI_INTEGRATION.md
+- [x] T015 [US1] Align feature contract wording with implementation behavior in specs/004-statement-handler-contract/contracts/statement-handler-contract.md
 
 **Checkpoint**: Statement extensibility contract is explicit and enforceable.
 
@@ -65,12 +65,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T016 [US2] Implement built-in `license:v1` handler with strict field validation in src/Sigil.Sdk/Statements/LicenseV1StatementHandler.cs
-- [ ] T017 [P] [US2] Add helper validation for `features` kebab-case and duplicate detection in src/Sigil.Sdk/Statements/LicenseV1StatementHandler.cs
-- [ ] T018 [US2] Implement typed claim model fields and constructors for `productId`, `edition`, `features`, `expiresAt`, `maxSeats`, `issuedAt` in src/Sigil.Sdk/Validation/LicenseClaims.cs
-- [ ] T019 [US2] Register built-in `license:v1` statement handler by default in src/Sigil.Sdk/DependencyInjection/ServiceCollectionExtensions.cs
-- [ ] T020 [US2] Ensure statement resolution path uses canonical statement IDs in src/Sigil.Sdk/Validation/LicenseValidator.cs
-- [ ] T021 [P] [US2] Align statement definition contract with final field/type rules in specs/004-statement-handler-contract/contracts/license-v1-statement.md
+- [x] T016 [US2] Implement built-in `license:v1` handler with strict field validation in src/Sigil.Sdk/Statements/LicenseV1StatementHandler.cs
+- [x] T017 [P] [US2] Add helper validation for `features` kebab-case and duplicate detection in src/Sigil.Sdk/Statements/LicenseV1StatementHandler.cs
+- [x] T018 [US2] Implement typed claim model fields and constructors for `productId`, `edition`, `features`, `expiresAt`, `maxSeats`, `issuedAt` in src/Sigil.Sdk/Validation/LicenseClaims.cs
+- [x] T019 [US2] Register built-in `license:v1` statement handler by default in src/Sigil.Sdk/DependencyInjection/ServiceCollectionExtensions.cs
+- [x] T020 [US2] Ensure statement resolution path uses canonical statement IDs in src/Sigil.Sdk/Validation/LicenseValidator.cs
+- [x] T021 [P] [US2] Align statement definition contract with final field/type rules in specs/004-statement-handler-contract/contracts/license-v1-statement.md
 
 **Checkpoint**: `license:v1` statement handler is fully functional and deterministic.
 
@@ -83,11 +83,11 @@
 
 ### Implementation for User Story 3
 
-- [ ] T022 [US3] Refactor expiry stage to consume validated claims instead of raw JSON in src/Sigil.Sdk/Validation/LicenseValidator.cs
-- [ ] T023 [US3] Normalize `expiresAt` handling to statement-defined type semantics in src/Sigil.Sdk/Validation/LicenseValidator.cs
-- [ ] T024 [P] [US3] Clarify pipeline-stage constants/comments for statement vs expiry stages in src/Sigil.Sdk/Validation/ValidationPipeline.cs
-- [ ] T025 [P] [US3] Align expiry semantic contract with implemented pipeline ordering in specs/004-statement-handler-contract/contracts/expiry-evaluation.md
-- [ ] T026 [US3] Update architecture narrative for conceptual ownership vs execution stage in docs/architecture.md
+- [x] T022 [US3] Refactor expiry stage to consume validated claims instead of raw JSON in src/Sigil.Sdk/Validation/LicenseValidator.cs
+- [x] T023 [US3] Normalize `expiresAt` handling to statement-defined type semantics in src/Sigil.Sdk/Validation/LicenseValidator.cs
+- [x] T024 [P] [US3] Clarify pipeline-stage constants/comments for statement vs expiry stages in src/Sigil.Sdk/Validation/ValidationPipeline.cs
+- [x] T025 [P] [US3] Align expiry semantic contract with implemented pipeline ordering in specs/004-statement-handler-contract/contracts/expiry-evaluation.md
+- [x] T026 [US3] Update architecture narrative for conceptual ownership vs execution stage in docs/architecture.md
 
 **Checkpoint**: Expiry semantics are clear, deterministic, and pipeline-consistent.
 
@@ -97,12 +97,12 @@
 
 **Purpose**: Final consistency, documentation polish, and verification across all stories.
 
-- [ ] T027 [P] Synchronize feature quickstart with implemented API and field semantics in specs/004-statement-handler-contract/quickstart.md (supports SC-007)
-- [ ] T028 [P] Update feature data model to match final implemented claim/expiry behavior in specs/004-statement-handler-contract/data-model.md (supports FR-010, FR-012)
-- [ ] T029 Perform end-to-end feature consistency review across spec/plan/contracts in specs/004-statement-handler-contract/spec.md (supports FR-001, FR-006)
-- [ ] T030 Run focused validation-related test suite in tests/Sigil.Sdk.Tests/Sigil.Sdk.Tests.csproj (supports SC-002, SC-003)
-- [ ] T031 [P] Document handler determinism and logging guidance (no full `publicInputs` logging) in docs/DI_INTEGRATION.md
-- [ ] T032 Add deterministic expiry failure mapping verification in src/Sigil.Sdk/Validation/FailureClassification.cs
+- [x] T027 [P] Synchronize feature quickstart with implemented API and field semantics in specs/004-statement-handler-contract/quickstart.md (supports SC-007)
+- [x] T028 [P] Update feature data model to match final implemented claim/expiry behavior in specs/004-statement-handler-contract/data-model.md (supports FR-010, FR-012)
+- [x] T029 Perform end-to-end feature consistency review across spec/plan/contracts in specs/004-statement-handler-contract/spec.md (supports FR-001, FR-006)
+- [x] T030 Run focused validation-related test suite in tests/Sigil.Sdk.Tests/Sigil.Sdk.Tests.csproj (supports SC-002, SC-003)
+- [x] T031 [P] Document handler determinism and logging guidance (no full `publicInputs` logging) in docs/DI_INTEGRATION.md
+- [x] T032 Add deterministic expiry failure mapping verification in src/Sigil.Sdk/Validation/FailureClassification.cs
 
 ---
 
