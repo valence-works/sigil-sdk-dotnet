@@ -1,0 +1,115 @@
+openapi: 3.1.0
+info:
+  title: Sigil Proof System Verifier Contract
+  version: 0.1.0
+  description: |
+    Verification-only contract for proof-system verification behavior in the Sigil SDK.
+    This contract captures deterministic status mappings and fail-closed pipeline semantics.
+servers:
+  - url: https://sdk.local
+paths:
+  /v1/verification/validate:
+    post:
+      summary: Validate proof envelope data
+      description: |
+        Validates proof data using schema-first pipeline semantics and proof-system verifier resolution.
+        This endpoint models contract behavior for SDK conformance testing.
+      operationId: validateProofEnvelope
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidationRequest'
+      responses:
+        '200':
+          description: Validation completed with deterministic status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+              examples:
+                valid:
+                  value:
+                    status: Valid
+                invalidProof:
+                  value:
+                    status: Invalid
+                    failureCode: PROOF_VERIFICATION_FAILED
+                unsupportedProofSystem:
+                  value:
+                    status: Unsupported
+                    failureCode: PROOF_SYSTEM_UNSUPPORTED
+                internalVerifierError:
+                  value:
+                    status: Error
+                    failureCode: PROOF_VERIFIER_INTERNAL_ERROR
+        '499':
+          description: Request cancelled by caller; no validation status mapping is produced.
+      x-stage-precedence:
+        - schema
+        - routing
+        - proof
+        - statement
+        - expiry
+      x-first-failing-stage-wins: true
+components:
+  schemas:
+    ValidationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - envelopeVersion
+        - proofSystem
+        - statementId
+        - proofBytes
+        - verificationContext
+      properties:
+        envelopeVersion:
+          type: string
+          minLength: 1
+          description: Envelope format version from Spec 001.
+        proofSystem:
+          type: string
+          description: Canonical case-sensitive proof system identifier.
+          examples: [midnight-zk-v1]
+        statementId:
+          type: string
+          minLength: 1
+          description: Statement identifier used to derive verification context.
+        proofBytes:
+          type: string
+          contentEncoding: base64
+          description: Raw proof bytes. Must be redacted from logs and diagnostics.
+        verificationContext:
+          type: object
+          description: Statement-produced context consumed by the proof-system verifier.
+          additionalProperties: true
+    ValidationResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+      properties:
+        status:
+          $ref: '#/components/schemas/LicenseStatus'
+        failureCode:
+          type: string
+          nullable: true
+          description: Deterministic failure code when status is non-Valid.
+    LicenseStatus:
+      type: string
+      enum:
+        - Valid
+        - Invalid
+        - Expired
+        - Unsupported
+        - Malformed
+        - Error
+x-sigil-policy:
+  offlineOnly: true
+  deterministicForIdenticalInputs: true
+  noProofBytesInLogs: true
+  initialSupportedProofSystems:
+    - midnight-zk-v1
+  futureProofSystemExtensibility: di-registered-verifier
