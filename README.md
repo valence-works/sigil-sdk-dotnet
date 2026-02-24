@@ -46,6 +46,7 @@ Current specs:
 - [003 - DI Integration & Defaults](specs/003-di-integration/)
 - [004 - Statement Handler Contract](specs/004-statement-handler-contract/)
 - [005 - Proof System Verifier Contract](specs/005-proof-system-verifier-contract/)
+- [006 - Midnight Proof Verifier](specs/006-midnight-proof-verifier/)
 
 ## Spec 005 Implementation Notes
 
@@ -53,6 +54,14 @@ Current specs:
 - Proof-system verifier resolution is deterministic, canonical, and case-sensitive.
 - Validation remains fail-closed and offline-capable.
 - Diagnostics remain redaction-safe and never emit raw `proofBytes`.
+
+## Midnight Verifier Notes (Spec 006)
+
+- Built-in verifier supports deterministic `Verified` / `Invalid` / `Error` proof outcomes.
+- Current statement compatibility is `urn:sigil:statement:license:v1`.
+- Internal verifier faults map to `LicenseStatus.Error` with `ProofVerifierInternalError`.
+- Verifier lifecycle uses one-time initialization with thread-safe reuse.
+- Conformance vectors and initialization/performance tests are included under `tests/Sigil.Sdk.Tests`.
 
 ## Samples
 

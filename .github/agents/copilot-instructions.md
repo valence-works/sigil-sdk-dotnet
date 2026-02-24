@@ -8,6 +8,8 @@ Auto-generated from all feature plans. Last updated: 2026-02-15
 - C# with .NET 10 SDK + Microsoft.Extensions.DependencyInjection.Abstractions, Microsoft.Extensions.Logging.Abstractions, Corvus.Json.Validator (003-di-integration)
 - C# with .NET 10 SDK + Microsoft.Extensions.DependencyInjection.Abstractions, Microsoft.Extensions.Logging.Abstractions, Corvus.Json.Validator (004-statement-handler-contract)
 - C#; SDK built with .NET 10 SDK, library target remains `net8.0` (runtime compatibility baseline) + Microsoft.Extensions.DependencyInjection.Abstractions, Microsoft.Extensions.Logging.Abstractions, Corvus.Json.Validator (005-proof-system-verifier-contract)
+- C#; SDK built with .NET 10 SDK, library target `net8.0` (runtime compatibility baseline) + Microsoft.Extensions.DependencyInjection.Abstractions, Microsoft.Extensions.Logging.Abstractions, existing Spec 005 proof-system contracts (`IProofSystemVerifier`, `ProofVerificationOutcome`), Spec 002 validation pipeline integration (006-midnight-proof-verifier)
+- N/A (verification-only scope) (006-midnight-proof-verifier)
 
 - C# / .NET 10 (planned SDK target; repository currently empty) + System.Text.Json; JSON Schema validator (e.g., JsonSchema.Net) (001-proof-envelope-format)
 
@@ -27,9 +29,9 @@ tests/
 C# / .NET 10 (planned SDK target; repository currently empty): Follow standard conventions
 
 ## Recent Changes
+- 006-midnight-proof-verifier: Added C#; SDK built with .NET 10 SDK, library target `net8.0` (runtime compatibility baseline) + Microsoft.Extensions.DependencyInjection.Abstractions, Microsoft.Extensions.Logging.Abstractions, existing Spec 005 proof-system contracts (`IProofSystemVerifier`, `ProofVerificationOutcome`), Spec 002 validation pipeline integration
 - 005-proof-system-verifier-contract: Added C#; SDK built with .NET 10 SDK, library target remains `net8.0` (runtime compatibility baseline) + Microsoft.Extensions.DependencyInjection.Abstractions, Microsoft.Extensions.Logging.Abstractions, Corvus.Json.Validator
 - 004-statement-handler-contract: Added C# with .NET 10 SDK + Microsoft.Extensions.DependencyInjection.Abstractions, Microsoft.Extensions.Logging.Abstractions, Corvus.Json.Validator
-- 003-di-integration: Added C# with .NET 10 SDK + Microsoft.Extensions.DependencyInjection.Abstractions, Microsoft.Extensions.Logging.Abstractions, Corvus.Json.Validator
 
 
 <!-- MANUAL ADDITIONS START -->

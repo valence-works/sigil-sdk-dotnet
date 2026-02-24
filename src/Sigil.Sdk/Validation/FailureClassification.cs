@@ -55,7 +55,7 @@ public static class FailureClassification
             LicenseFailureCode.LicenseExpired => "License is expired.",
             LicenseFailureCode.ExpiresAtInvalid => "expiresAt is not a valid unix timestamp.",
             LicenseFailureCode.StreamReadFailed => "Failed to read input stream.",
-            LicenseFailureCode.ProofVerifierInternalError => "Proof verifier internal error.",
+            LicenseFailureCode.ProofVerifierInternalError => "Proof verification internal error.",
             _ => "Internal validation error.",
         };
     }

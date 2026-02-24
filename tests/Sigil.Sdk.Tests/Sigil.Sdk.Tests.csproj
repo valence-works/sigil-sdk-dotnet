@@ -24,4 +24,11 @@
     <ProjectReference Include="..\..\src\Sigil.Sdk\Sigil.Sdk.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Validation/Conformance/Vectors/*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Validation/Conformance/Vectors/%(Filename)%(Extension)</Link>
+    </None>
+  </ItemGroup>
+
 </Project>

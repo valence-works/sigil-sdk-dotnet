@@ -2,6 +2,7 @@
 
 using System.Text;
 using System.Text.Json;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Sigil.Sdk.Envelope;
 using Sigil.Sdk.Logging;
@@ -144,11 +145,15 @@ public sealed class LicenseValidator : ILicenseValidator
             var verificationContext = new ProofVerificationContext(readResult.StatementId, publicInputs);
 
             ProofVerificationOutcome verificationOutcome;
+            long verificationElapsedMs = 0;
             try
             {
+                var verifyStopwatch = Stopwatch.StartNew();
                 verificationOutcome = await verifier
                     .VerifyAsync(proofBytes, verificationContext, cancellationToken)
                     .ConfigureAwait(false);
+                verifyStopwatch.Stop();
+                verificationElapsedMs = verifyStopwatch.ElapsedMilliseconds;
             }
             catch (OperationCanceledException)
             {
@@ -156,10 +161,14 @@ public sealed class LicenseValidator : ILicenseValidator
             }
             catch (Exception ex)
             {
+                // budget accounting still captures elapsed within this stage for diagnostics.
+                verificationElapsedMs = 0;
                 verificationOutcome = ProofVerificationOutcome.VerifierError(
                     LicenseFailureCode.ProofVerifierInternalError,
                     ex);
             }
+
+            LogVerificationTiming(readResult, verificationElapsedMs);
 
             if (verificationOutcome.Kind == ProofVerificationResultKind.InvalidProof)
             {
@@ -251,7 +260,7 @@ public sealed class LicenseValidator : ILicenseValidator
         var failure = new LicenseValidationFailure(
             code: code,
             message: message,
-            diagnosticException: options.EnableDiagnostics ? diagnosticException : null);
+            diagnosticException: options.EnableDiagnostics ? RedactDiagnosticException(diagnosticException) : null);
 
         var result = new LicenseValidationResult(
             status: status,
@@ -271,5 +280,29 @@ public sealed class LicenseValidator : ILicenseValidator
             : base(message, innerException)
         {
         }
+    }
+
+    private static Exception? RedactDiagnosticException(Exception? diagnosticException)
+    {
+        if (diagnosticException is null)
+        {
+            return null;
+        }
+
+        return new InvalidOperationException("Validation internal error.");
+    }
+
+    private void LogVerificationTiming(ProofEnvelopeReadResult readResult, long elapsedMs)
+    {
+        if (!options.EnableDiagnostics || logger is null)
+        {
+            return;
+        }
+
+        logger.LogDebug(
+            "Sigil verification stage timing: {ProofSystem} {StatementId} {ElapsedMs}",
+            readResult.ProofSystem,
+            readResult.StatementId,
+            elapsedMs);
     }
 }
