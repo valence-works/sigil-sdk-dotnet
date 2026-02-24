@@ -12,7 +12,7 @@ namespace Sigil.Sdk.Tests.Performance;
 
 public sealed class ValidationPerformanceBenchmarks
 {
-    [Fact(Skip = "Manual performance benchmark (Spec 002 SC-004).")]
+    [Fact]
     public async Task Validate_P95_UnderOneSecond_For10KbEnvelopes_Offline()
     {
         // Spec 002 (SC-004): measurement method.
@@ -37,9 +37,8 @@ public sealed class ValidationPerformanceBenchmarks
         durations.Sort();
         var p95 = durations[(int)Math.Floor(durations.Count * 0.95) - 1];
 
-        // Intentionally no assert to avoid environment flakiness.
-        // Inspect p95 in the debugger/test output when running manually.
-        Assert.True(p95 >= TimeSpan.Zero);
+        Console.WriteLine($"Spec005 p95 latency (<=10KB, offline): {p95.TotalMilliseconds:F2}ms");
+        Assert.True(p95 < TimeSpan.FromSeconds(1), $"Expected p95 < 1000ms, got {p95.TotalMilliseconds:F2}ms");
     }
 
     /// <summary>
@@ -137,13 +136,12 @@ public sealed class ValidationPerformanceBenchmarks
 
     private sealed class AlwaysTrueVerifier : IProofSystemVerifier
     {
-        public Task<bool> VerifyAsync(
-            string statementId,
-            JsonElement publicInputs,
+        public Task<ProofVerificationOutcome> VerifyAsync(
             ReadOnlyMemory<byte> proofBytes,
+            ProofVerificationContext context,
             CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(true);
+            return Task.FromResult(ProofVerificationOutcome.Verified());
         }
     }
 

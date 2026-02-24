@@ -86,13 +86,14 @@ public sealed class LicenseValidatorCryptoTests
             this.result = result;
         }
 
-        public Task<bool> VerifyAsync(
-            string statementId,
-            JsonElement publicInputs,
+        public Task<ProofVerificationOutcome> VerifyAsync(
             ReadOnlyMemory<byte> proofBytes,
+            ProofVerificationContext context,
             CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(result);
+            return Task.FromResult(result
+                ? ProofVerificationOutcome.Verified()
+                : ProofVerificationOutcome.Invalid());
         }
     }
 

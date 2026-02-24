@@ -742,13 +742,12 @@ public class ServiceCollectionExtensionsTests
     /// </summary>
     private class MockProofSystemVerifier : IProofSystemVerifier
     {
-        public Task<bool> VerifyAsync(
-            string statementId,
-            System.Text.Json.JsonElement publicInputs,
+        public Task<ProofVerificationOutcome> VerifyAsync(
             ReadOnlyMemory<byte> proofBytes,
+            ProofVerificationContext context,
             CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(true);
+            return Task.FromResult(ProofVerificationOutcome.Verified());
         }
     }
 
@@ -788,13 +787,12 @@ public class ServiceCollectionExtensionsTests
             throw new InvalidOperationException("Verifier construction failed.");
         }
 
-        public Task<bool> VerifyAsync(
-            string statementId,
-            System.Text.Json.JsonElement publicInputs,
+        public Task<ProofVerificationOutcome> VerifyAsync(
             ReadOnlyMemory<byte> proofBytes,
+            ProofVerificationContext context,
             CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(false);
+            return Task.FromResult(ProofVerificationOutcome.Invalid());
         }
     }
 

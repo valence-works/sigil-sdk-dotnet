@@ -68,10 +68,10 @@ public sealed class ValidationLoggingTests
     }
 
     /// <summary>
-    /// Spec 003 (T027): When LogFailureDetails=true, failure details are logged
+    /// Spec 005 (FR-016/FR-016a): When LogFailureDetails=true, only approved metadata is logged
     /// </summary>
     [Fact]
-    public void LogValidationResult_WithLogFailureDetailsTrue_IncludesFailureMessage()
+    public void LogValidationResult_WithLogFailureDetailsTrue_LogsMetadataOnly()
     {
         // Arrange
         var logger = new CapturingLogger();
@@ -91,10 +91,12 @@ public sealed class ValidationLoggingTests
         // Act
         ValidationLogging.LogValidationResult(logger, result, options);
 
-        // Assert - Both code and message logged
+        // Assert - Failure code and metadata logged, but no raw failure message
         var combined = string.Join("\n", logger.Messages);
         Assert.Contains("ProofVerificationFailed", combined);
-        Assert.Contains("Verification failed due to invalid signature", combined);
+        Assert.Contains("stmt", combined);
+        Assert.Contains("ps", combined);
+        Assert.DoesNotContain("invalid signature", combined);
     }
 
     /// <summary>

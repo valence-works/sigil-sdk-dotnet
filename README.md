@@ -44,6 +44,15 @@ Current specs:
 - [001 - Proof Envelope Format](specs/001-proof-envelope-format/)
 - [002 - SDK Validation API](specs/002-sdk-validation-api/)
 - [003 - DI Integration & Defaults](specs/003-di-integration/)
+- [004 - Statement Handler Contract](specs/004-statement-handler-contract/)
+- [005 - Proof System Verifier Contract](specs/005-proof-system-verifier-contract/)
+
+## Spec 005 Implementation Notes
+
+- `midnight-zk-v1` is the initial built-in proof system verifier identifier.
+- Proof-system verifier resolution is deterministic, canonical, and case-sensitive.
+- Validation remains fail-closed and offline-capable.
+- Diagnostics remain redaction-safe and never emit raw `proofBytes`.
 
 ## Samples
 

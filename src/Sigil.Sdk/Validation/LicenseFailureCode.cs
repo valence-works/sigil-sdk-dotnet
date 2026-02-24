@@ -16,4 +16,6 @@ public enum LicenseFailureCode
     StatementValidationFailed = 10,
     InternalError = 11,
     ExpiresAtInvalid = 12,
+    ProofVerifierInternalError = 13,
+    ProofVerificationContextIncompatible = 14,
 }

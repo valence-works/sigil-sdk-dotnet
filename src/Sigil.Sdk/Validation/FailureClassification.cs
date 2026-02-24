@@ -24,6 +24,7 @@ public static class FailureClassification
             LicenseFailureCode.UnsupportedStatement => LicenseStatus.Unsupported,
 
             LicenseFailureCode.ProofVerificationFailed => LicenseStatus.Invalid,
+            LicenseFailureCode.ProofVerificationContextIncompatible => LicenseStatus.Invalid,
             // StatementValidationFailed covers semantic validation and statement contract violations.
             LicenseFailureCode.StatementValidationFailed => LicenseStatus.Invalid,
 
@@ -32,6 +33,7 @@ public static class FailureClassification
 
             LicenseFailureCode.StreamReadFailed => LicenseStatus.Error,
             LicenseFailureCode.InternalError => LicenseStatus.Error,
+            LicenseFailureCode.ProofVerifierInternalError => LicenseStatus.Error,
 
             _ => LicenseStatus.Error,
         };
@@ -48,10 +50,12 @@ public static class FailureClassification
             LicenseFailureCode.UnsupportedStatement => "Statement is not supported.",
             LicenseFailureCode.ProofBytesInvalid => "proofBytes is not valid base64.",
             LicenseFailureCode.ProofVerificationFailed => "Cryptographic verification failed.",
+            LicenseFailureCode.ProofVerificationContextIncompatible => "Proof verification context is incompatible.",
             LicenseFailureCode.StatementValidationFailed => "Statement validation failed.",
             LicenseFailureCode.LicenseExpired => "License is expired.",
             LicenseFailureCode.ExpiresAtInvalid => "expiresAt is not a valid unix timestamp.",
             LicenseFailureCode.StreamReadFailed => "Failed to read input stream.",
+            LicenseFailureCode.ProofVerifierInternalError => "Proof verifier internal error.",
             _ => "Internal validation error.",
         };
     }
