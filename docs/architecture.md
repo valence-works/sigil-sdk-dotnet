@@ -258,6 +258,23 @@ All scenarios use identical registration pattern with optional configuration lam
 - Proof-stage failures remain fail-closed and first-failing-stage semantics are preserved throughout the validation pipeline.
 - Logging and diagnostics are redaction-safe: raw proof material is never emitted.
 
+### Midnight Proof Verifier (Spec 006)
+
+- Built-in verifier: `midnight-zk-v1` via `MidnightZkV1ProofSystemVerifier`.
+- Statement compatibility gate: `urn:sigil:statement:license:v1` only for current release.
+- Deterministic outcomes:
+   - verified cryptography -> `Verified` (pipeline continues to statement + expiry checks)
+   - cryptographic failure -> `Invalid` with `ProofVerificationFailed`
+   - internal verifier fault -> `Error` with `ProofVerifierInternalError`
+- Fail-closed security behavior:
+   - no raw `proofBytes` in logs, exceptions, or diagnostics
+   - redacted outward errors for verifier internals
+- Runtime behavior:
+   - one-time lazy initialization of verifier backend
+   - thread-safe reuse for concurrent validations
+   - verification-stage timing capture in diagnostics for budget accounting
+- Performance budget alignment: Midnight proof stage targets <= 60% of Spec 002 SC-004 p95 budget.
+
 ### Security Considerations
 
 1. **No Proof Bytes in Logs**: SDK enforces constitution constraint that `proofBytes` never appear in logs or error messages

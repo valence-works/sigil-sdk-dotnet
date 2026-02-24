@@ -18,11 +18,11 @@
 
 **Purpose**: Prepare conformance assets and test harness scaffolding for Midnight verification.
 
-- [ ] T001 Create conformance suite scaffold and vector contract documentation in tests/Sigil.Sdk.Tests/Validation/Conformance/README.md
-- [ ] T002 [P] Create known-valid vector placeholder for `urn:sigil:statement:license:v1` in tests/Sigil.Sdk.Tests/Validation/Conformance/Vectors/license-v1-valid.json
-- [ ] T003 [P] Create known-invalid vector placeholder in tests/Sigil.Sdk.Tests/Validation/Conformance/Vectors/license-v1-invalid.json
-- [ ] T004 [P] Create simulated internal-error vector placeholder in tests/Sigil.Sdk.Tests/Validation/Conformance/Vectors/license-v1-internal-error.json
-- [ ] T005 Add conformance vector loader/model utilities in tests/Sigil.Sdk.Tests/Validation/Conformance/MidnightConformanceVectors.cs
+- [x] T001 Create conformance suite scaffold and vector contract documentation in tests/Sigil.Sdk.Tests/Validation/Conformance/README.md
+- [x] T002 [P] Create known-valid vector placeholder for `urn:sigil:statement:license:v1` in tests/Sigil.Sdk.Tests/Validation/Conformance/Vectors/license-v1-valid.json
+- [x] T003 [P] Create known-invalid vector placeholder in tests/Sigil.Sdk.Tests/Validation/Conformance/Vectors/license-v1-invalid.json
+- [x] T004 [P] Create simulated internal-error vector placeholder in tests/Sigil.Sdk.Tests/Validation/Conformance/Vectors/license-v1-internal-error.json
+- [x] T005 Add conformance vector loader/model utilities in tests/Sigil.Sdk.Tests/Validation/Conformance/MidnightConformanceVectors.cs
 
 ---
 
@@ -30,14 +30,14 @@
 
 **Purpose**: Core verifier plumbing and deterministic mapping that all stories depend on.
 
-**⚠️ CRITICAL**: Complete this phase before implementing user stories.
+**✅ COMPLETE**: All foundational tasks finished.
 
-- [ ] T006 Confirm canonical proof-system identifier usage (`midnight-zk-v1`) in src/Sigil.Sdk/Proof/ProofSystemIds.cs
-- [ ] T007 Align proof verifier abstraction contracts for deterministic outcomes in src/Sigil.Sdk/Proof/IProofSystemVerifier.cs
-- [ ] T008 Align proof verification result contract for `Verified`/`Not Verified` semantics in src/Sigil.Sdk/Proof/ProofVerificationOutcome.cs
-- [ ] T009 Enforce deterministic verifier fault mapping (`Error`) in validation pipeline orchestration in src/Sigil.Sdk/Validation/LicenseValidator.cs
-- [ ] T010 Ensure default DI registration wires Midnight verifier via options in src/Sigil.Sdk/Validation/ValidationOptions.cs and src/Sigil.Sdk/DependencyInjection/ServiceCollectionExtensions.cs
-- [ ] T011 Add foundational registration and routing tests for Midnight verifier resolution in tests/Sigil.Sdk.Tests/DependencyInjection/ServiceCollectionExtensionsTests.cs
+- [x] T006 Confirm canonical proof-system identifier usage (`midnight-zk-v1`) in src/Sigil.Sdk/Proof/ProofSystemIds.cs
+- [x] T007 Align proof verifier abstraction contracts for deterministic outcomes in src/Sigil.Sdk/Proof/IProofSystemVerifier.cs
+- [x] T008 Align proof verification result contract for `Verified`/`Not Verified` semantics in src/Sigil.Sdk/Proof/ProofVerificationOutcome.cs
+- [x] T009 Enforce deterministic verifier fault mapping (`Error`) in validation pipeline orchestration in src/Sigil.Sdk/Validation/LicenseValidator.cs
+- [x] T010 Ensure default DI registration wires Midnight verifier via options in src/Sigil.Sdk/Validation/ValidationOptions.cs and src/Sigil.Sdk/DependencyInjection/ServiceCollectionExtensions.cs
+- [x] T011 Add foundational registration and routing tests for Midnight verifier resolution in tests/Sigil.Sdk.Tests/DependencyInjection/ServiceCollectionExtensionsTests.cs
 
 **Checkpoint**: Foundation complete; user stories can proceed.
 
@@ -53,29 +53,29 @@
 
 ### Dependency & Binary Setup
 
-- [ ] T012 [P] Add Wasmtime.NET v16+ NuGet dependency to src/Sigil.Sdk/Sigil.Sdk.csproj
-- [ ] T013 [P] Extract `@midnight-ntwrk/proof-verification` WASM binary from npm package and create extraction script in .specify/scripts/extract-midnight-wasm.sh
-- [ ] T014 [P] Validate extracted WASM binary checksum against known-good hash and document in docs/
-- [ ] T015 Create WasmBinaryEmbedding test to verify WASM binary is properly embedded as EmbeddedResource in build
+- [x] T012 [P] Add Wasmtime.NET v16+ NuGet dependency to src/Sigil.Sdk/Sigil.Sdk.csproj
+- [x] T013 [P] Extract `@midnight-ntwrk/proof-verification` WASM binary from npm package and create extraction script in .specify/scripts/extract-midnight-wasm.sh
+- [x] T014 [P] Validate extracted WASM binary checksum against known-good hash and document in docs/
+- [x] T015 Create WasmBinaryEmbedding test to verify WASM binary is properly embedded as EmbeddedResource in build
 
 ### PoC Implementation
 
-- [ ] T016 Build minimal PoC Wasmtime.NET instance loader in src/Sigil.Sdk/Proof/WasmtimeMidnightLoader.cs (private utility, not public API)
-- [ ] T017 Reverse-engineer WASM function signatures from `@midnight-ntwrk/proof-verification` TypeScript definitions and document in docs/MIDNIGHT_WASM_SIGNATURES.md
-- [ ] T018 Implement single-proof verification demo in PoC implementation (minimal, not production-ready)
-- [ ] T019 Add timeout and exception handling to PoC for graceful WASM fault modes
+- [x] T016 Build minimal PoC Wasmtime.NET instance loader in src/Sigil.Sdk/Proof/WasmtimeMidnightLoader.cs (private utility, not public API)
+- [x] T017 Reverse-engineer WASM function signatures from `@midnight-ntwrk/proof-verification` TypeScript definitions and document in docs/MIDNIGHT_WASM_SIGNATURES.md
+- [x] T018 Implement single-proof verification demo in PoC implementation (minimal, not production-ready)
+- [x] T019 Add timeout and exception handling to PoC for graceful WASM fault modes
 
 ### Latency Validation
 
-- [ ] T020 Create latency micro-benchmark in tests/Sigil.Sdk.Tests/Performance/ using BenchmarkDotNet on 10+ known-valid proofs
-- [ ] T021 Document baseline latencies: module load, cold verification, warm verification, marshalling overhead in tests/Performance/MIDNIGHT_LATENCY_BASELINE.txt
-- [ ] T022 Validate latency compliance: confirm all measurements <120ms per proof (fits SC-004 budget)
+- [x] T020 Create latency micro-benchmark in tests/Sigil.Sdk.Tests/Performance/ using BenchmarkDotNet on 10+ known-valid proofs
+- [x] T021 Document baseline latencies: module load, cold verification, warm verification, marshalling overhead in tests/Performance/MIDNIGHT_LATENCY_BASELINE.txt
+- [x] T022 Validate latency compliance: confirm all measurements <120ms per proof (fits SC-004 budget)
 
 ### Test Vector Research & Acquisition
 
-- [ ] T023 **Acquire** (not just research) Midnight conformance test vectors meeting FR-015 requirements: minimum 3 vectors (valid, invalid, internal-error) from community or generated via documented process in docs/MIDNIGHT_TEST_VECTOR_ACQUISITION.md
+- [x] T023 **Acquire** (not just research) Midnight conformance test vectors meeting FR-015 requirements: minimum 3 vectors (valid, invalid, internal-error) from community or generated via documented process in docs/MIDNIGHT_TEST_VECTOR_ACQUISITION.md
   > Success criteria: 3 vectors obtained with documented source/checksums; vectors parseable into JSON structure
-- [ ] T024 [P] Create placeholder test vector structure in tests/Sigil.Sdk.Tests/Validation/Conformance/Vectors/ pending vector acquisition
+- [x] T024 [P] Create placeholder test vector structure in tests/Sigil.Sdk.Tests/Validation/Conformance/Vectors/ pending vector acquisition
 
 **Checkpoint**: PoC validated. WASM bridge strategy confirmed. Ready for Phase 3 production implementation.
 
@@ -89,17 +89,17 @@
 
 ### Tests for User Story 1
 
-- [ ] T025 [US1] Create Midnight conformance test harness for vector-driven validation in tests/Sigil.Sdk.Tests/Validation/MidnightProofConformanceTests.cs
-- [ ] T026 [US1] Add known-valid and known-invalid vector assertions for `license:v1` in tests/Sigil.Sdk.Tests/Validation/MidnightProofConformanceTests.cs
-- [ ] T026a [US1] Add test assertions verifying Midnight verifier validates proof cryptography only (FR-008: does NOT interpret statement claims or business semantics); add explicit negative tests for claim-free verification in tests/Sigil.Sdk.Tests/Validation/MidnightProofConformanceTests.cs
+- [x] T025 [US1] Create Midnight conformance test harness for vector-driven validation in tests/Sigil.Sdk.Tests/Validation/MidnightProofConformanceTests.cs
+- [x] T026 [US1] Add known-valid and known-invalid vector assertions for `license:v1` in tests/Sigil.Sdk.Tests/Validation/MidnightProofConformanceTests.cs
+- [x] T026a [US1] Add test assertions verifying Midnight verifier validates proof cryptography only (FR-008: does NOT interpret statement claims or business semantics); add explicit negative tests for claim-free verification in tests/Sigil.Sdk.Tests/Validation/MidnightProofConformanceTests.cs
 
 ### Implementation for User Story 1
 
-- [ ] T027 [US1] Implement offline Midnight proof verification path in src/Sigil.Sdk/Proof/MidnightZkV1ProofSystemVerifier.cs
+- [x] T027 [US1] Implement offline Midnight proof verification path in src/Sigil.Sdk/Proof/MidnightZkV1ProofSystemVerifier.cs
   > ✅ **UNBLOCKED**: Q6 research complete. Use Wasmtime.NET bridge per Phase 2.5 PoC. See [research.md](research.md#q6-which-midnight-libraries-provide-zk-verification-and-how-should-wasm-components-be-bridged-to-c) Q6 and [plan.md](plan.md#phase-0-research-resolution-midnight-library--wasm-bridge-strategy).
-- [ ] T028 [US1] Enforce statement-context compatibility gate for `urn:sigil:statement:license:v1` in src/Sigil.Sdk/Proof/MidnightZkV1ProofSystemVerifier.cs
-- [ ] T029 [US1] Map Midnight cryptographic verification failure deterministically to `Invalid` in src/Sigil.Sdk/Validation/LicenseValidator.cs
-- [ ] T030 [US1] Ensure proof verification context construction remains statement-bound without claim interpretation in src/Sigil.Sdk/Proof/ProofVerificationContext.cs and src/Sigil.Sdk/Validation/LicenseValidator.cs
+- [x] T028 [US1] Enforce statement-context compatibility gate for `urn:sigil:statement:license:v1` in src/Sigil.Sdk/Proof/MidnightZkV1ProofSystemVerifier.cs
+- [x] T029 [US1] Map Midnight cryptographic verification failure deterministically to `Invalid` in src/Sigil.Sdk/Validation/LicenseValidator.cs
+- [x] T030 [US1] Ensure proof verification context construction remains statement-bound without claim interpretation in src/Sigil.Sdk/Proof/ProofVerificationContext.cs and src/Sigil.Sdk/Validation/LicenseValidator.cs
 
 **Checkpoint**: US1 is independently functional and testable (MVP).
 
@@ -113,15 +113,15 @@
 
 ### Tests for User Story 2
 
-- [ ] T031 [US2] Add simulated internal-error vector assertions for deterministic `Error` mapping in tests/Sigil.Sdk.Tests/Validation/MidnightProofConformanceTests.cs
-- [ ] T032 [US2] Add proof-material redaction tests for diagnostics/logging in tests/Sigil.Sdk.Tests/Logging/ValidationLoggingTests.cs
+- [x] T031 [US2] Add simulated internal-error vector assertions for deterministic `Error` mapping in tests/Sigil.Sdk.Tests/Validation/MidnightProofConformanceTests.cs
+- [x] T032 [US2] Add proof-material redaction tests for diagnostics/logging in tests/Sigil.Sdk.Tests/Logging/ValidationLoggingTests.cs
 
 ### Implementation for User Story 2
 
-- [ ] T033 [US2] Implement safe verifier exception handling with redacted outward errors in src/Sigil.Sdk/Proof/MidnightZkV1ProofSystemVerifier.cs
-- [ ] T034 [US2] Enforce no-`proofBytes` emission in validator diagnostics and failure reporting in src/Sigil.Sdk/Validation/LicenseValidator.cs
-- [ ] T035 [US2] Ensure deterministic internal verifier failure code path (`ProofVerifierInternalError`) is mapped to `Error` in src/Sigil.Sdk/Validation/LicenseFailureCode.cs and src/Sigil.Sdk/Validation/LicenseValidator.cs
-- [ ] T036 [US2] Align failure classification metadata for Midnight verifier failures in src/Sigil.Sdk/Validation/FailureClassification.cs
+- [x] T033 [US2] Implement safe verifier exception handling with redacted outward errors in src/Sigil.Sdk/Proof/MidnightZkV1ProofSystemVerifier.cs
+- [x] T034 [US2] Enforce no-`proofBytes` emission in validator diagnostics and failure reporting in src/Sigil.Sdk/Validation/LicenseValidator.cs
+- [x] T035 [US2] Ensure deterministic internal verifier failure code path (`ProofVerifierInternalError`) is mapped to `Error` in src/Sigil.Sdk/Validation/LicenseFailureCode.cs and src/Sigil.Sdk/Validation/LicenseValidator.cs
+- [x] T036 [US2] Align failure classification metadata for Midnight verifier failures in src/Sigil.Sdk/Validation/FailureClassification.cs
 
 **Checkpoint**: US2 is independently functional and testable.
 
@@ -135,15 +135,15 @@
 
 ### Tests for User Story 3
 
-- [ ] T037 [US3] Add initialization and reuse determinism tests across repeated **and concurrent** validations (explicit thread-safety concurrency harness: validate N parallel verifications produce deterministic outcomes without race conditions) in tests/Sigil.Sdk.Tests/Validation/MidnightVerifierInitializationTests.cs
+- [x] T037 [US3] Add initialization and reuse determinism tests across repeated **and concurrent** validations (explicit thread-safety concurrency harness: validate N parallel verifications produce deterministic outcomes without race conditions) in tests/Sigil.Sdk.Tests/Validation/MidnightVerifierInitializationTests.cs
   > Success criteria: Concurrent throughput measured; zero race condition failures; performance ≥ baseline sequential
-- [ ] T038 [US3] Add Midnight budget-share benchmark assertions aligned to Spec 002 SC-004 method in tests/Sigil.Sdk.Tests/Performance/ValidationPerformanceBenchmarks.cs
+- [x] T038 [US3] Add Midnight budget-share benchmark assertions aligned to Spec 002 SC-004 method in tests/Sigil.Sdk.Tests/Performance/ValidationPerformanceBenchmarks.cs
 
 ### Implementation for User Story 3
 
-- [ ] T039 [US3] Implement one-time Midnight verifier initialization lifecycle in src/Sigil.Sdk/Proof/MidnightZkV1ProofSystemVerifier.cs
-- [ ] T040 [US3] Implement thread-safe reuse of initialized verifier state for concurrent validation (FR-010: safe reuse without changing outcomes for identical inputs) in src/Sigil.Sdk/Proof/MidnightZkV1ProofSystemVerifier.cs
-- [ ] T041 [US3] Add verification-stage timing capture for budget accounting in src/Sigil.Sdk/Validation/LicenseValidator.cs
+- [x] T039 [US3] Implement one-time Midnight verifier initialization lifecycle in src/Sigil.Sdk/Proof/MidnightZkV1ProofSystemVerifier.cs
+- [x] T040 [US3] Implement thread-safe reuse of initialized verifier state for concurrent validation (FR-010: safe reuse without changing outcomes for identical inputs) in src/Sigil.Sdk/Proof/MidnightZkV1ProofSystemVerifier.cs
+- [x] T041 [US3] Add verification-stage timing capture for budget accounting in src/Sigil.Sdk/Validation/LicenseValidator.cs
 
 **Checkpoint**: US3 is independently functional and testable.
 
@@ -153,10 +153,10 @@
 
 **Purpose**: Cross-story documentation, traceability, and final execution validation.
 
-- [ ] T042 [P] Document Midnight verifier behavior, boundaries, and fail-closed guarantees in docs/architecture.md
-- [ ] T043 [P] Add Midnight verifier usage and diagnostics guidance in README.md
-- [ ] T044 Create Spec 006 execution scenarios and expected outcomes in specs/006-midnight-proof-verifier/quickstart.md
-- [ ] T045 Update feature execution plan notes and phase checkpoints in specs/006-midnight-proof-verifier/plan.md
+- [x] T042 [P] Document Midnight verifier behavior, boundaries, and fail-closed guarantees in docs/architecture.md
+- [x] T043 [P] Add Midnight verifier usage and diagnostics guidance in README.md
+- [x] T044 Create Spec 006 execution scenarios and expected outcomes in specs/006-midnight-proof-verifier/quickstart.md
+- [x] T045 Update feature execution plan notes and phase checkpoints in specs/006-midnight-proof-verifier/plan.md
 
 ---
 

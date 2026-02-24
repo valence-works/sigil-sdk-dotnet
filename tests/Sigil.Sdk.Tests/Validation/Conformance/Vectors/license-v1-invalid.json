@@ -1,0 +1,14 @@
+{
+  "testId": "midnight-invalid-license-v1-001",
+  "description": "Generated deterministic invalid-placeholder proof vector for license:v1 statement (offline conformance harness)",
+  "statementId": "urn:sigil:statement:license:v1",
+  "proofSystem": "midnight-zk-v1",
+  "proofBytes": "AA==",
+  "expectedOutcome": "Invalid",
+  "expectedFailureCode": "ProofVerificationFailed",
+  "context": {
+    "statementData": {}
+  },
+  "source": "Generated via documented process in docs/MIDNIGHT_TEST_VECTOR_ACQUISITION.md (2026-02-24)",
+  "checksum": "sha256(rawProofBytes)=6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+}

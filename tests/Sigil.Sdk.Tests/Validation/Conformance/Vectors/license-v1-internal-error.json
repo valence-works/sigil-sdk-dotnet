@@ -1,0 +1,15 @@
+{
+  "testId": "midnight-internal-error-license-v1-001",
+  "description": "Simulated internal verifier error for license:v1 - causes verifier to return Error status",
+  "statementId": "urn:sigil:statement:license:v1",
+  "proofSystem": "midnight-zk-v1",
+  "proofBytes": "Ag==",
+  "expectedOutcome": "Error",
+  "expectedFailureCode": "ProofVerifierInternalError",
+  "context": {
+    "statementData": {}
+  },
+  "source": "Simulated for error path testing (generated during Phase 2.5 PoC)",
+  "checksum": "sha256(rawProofBytes)=dbc1b4c900ffe48d575b5da5c638040125f65db0fe3e24494b76ea986457d986",
+  "simulationStrategy": "Use reserved placeholder proof bytes 0x02 (base64 Ag==) mapped by MidnightZkV1ProofSystemVerifier to VerifierError/ProofVerifierInternalError for deterministic internal-fault conformance testing."
+}

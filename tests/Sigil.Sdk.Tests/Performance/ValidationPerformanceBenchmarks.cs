@@ -13,6 +13,36 @@ namespace Sigil.Sdk.Tests.Performance;
 public sealed class ValidationPerformanceBenchmarks
 {
     [Fact]
+    public async Task MidnightVerifier_P95_StaysWithinBudgetShare()
+    {
+        using var verifier = new MidnightZkV1ProofSystemVerifier();
+        using var document = JsonDocument.Parse("{\"productId\":\"product\",\"maxSeats\":10}");
+        var context = new ProofVerificationContext(StatementIds.LicenseV1, document.RootElement.Clone());
+        var proofBytes = Convert.FromBase64String("AQ==");
+
+        for (var i = 0; i < 10; i++)
+        {
+            _ = await verifier.VerifyAsync(proofBytes, context);
+        }
+
+        var durations = new List<TimeSpan>(capacity: 100);
+        for (var i = 0; i < 100; i++)
+        {
+            var sw = Stopwatch.StartNew();
+            _ = await verifier.VerifyAsync(proofBytes, context);
+            sw.Stop();
+            durations.Add(sw.Elapsed);
+        }
+
+        durations.Sort();
+        var p95 = durations[(int)Math.Floor(durations.Count * 0.95) - 1];
+
+        Assert.True(
+            p95 < TimeSpan.FromMilliseconds(600),
+            $"Expected Midnight p95 < 600ms (60% share of 1s budget), got {p95.TotalMilliseconds:F2}ms");
+    }
+
+    [Fact]
     public async Task Validate_P95_UnderOneSecond_For10KbEnvelopes_Offline()
     {
         // Spec 002 (SC-004): measurement method.

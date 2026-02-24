@@ -197,14 +197,47 @@ The SDK includes conformance vectors for testing Midnight verification:
 [Fact]
 public async Task KnownValidVector_ReturnsVerified()
 {
-    var vectors = MidnightConformanceVectors.Load();
-    var validVector = vectors.Single(v => v.VectorId == "license-v1-valid");
+     var vectors = MidnightConformanceVectors.LoadAll();
+     var validVector = vectors.Single(v => v.ExpectedOutcome == "Verified");
 
-    var result = await validator.ValidateAsync(validVector.EnvelopeJson);
+     var verifier = new MidnightZkV1ProofSystemVerifier();
+     var proofBytes = Convert.FromBase64String(validVector.ProofBytes);
+     using var doc = JsonDocument.Parse("{\"productId\":\"product\",\"maxSeats\":10}");
+     var context = new ProofVerificationContext(validVector.StatementId, doc.RootElement.Clone());
 
-    Assert.Equal(LicenseStatus.Valid, result.Status);
+     var result = await verifier.VerifyAsync(proofBytes, context);
+
+     Assert.Equal(ProofVerificationResultKind.Verified, result.Kind);
 }
 ```
+
+## Execution Scenarios (Spec 006)
+
+The following scenarios are validated by the implementation and tests:
+
+1. **Known-valid proof, compatible statement context**
+    - Input: proof bytes from `license-v1-valid.json`, statement `urn:sigil:statement:license:v1`
+    - Expected verifier outcome: `Verified`
+    - Expected validation status (if statement + expiry pass): `Valid`
+
+2. **Known-invalid proof, compatible statement context**
+    - Input: proof bytes from `license-v1-invalid.json`, statement `urn:sigil:statement:license:v1`
+    - Expected verifier outcome: `Invalid(ProofVerificationFailed)`
+    - Expected validation status: `Invalid`
+
+3. **Simulated internal verifier fault**
+    - Input: proof bytes from `license-v1-internal-error.json`
+    - Expected verifier outcome: `Error(ProofVerifierInternalError)`
+    - Expected validation status: `Error`
+
+4. **Statement-context incompatibility**
+    - Input: valid proof bytes with unsupported statement id
+    - Expected verifier outcome: `Invalid(ProofVerificationContextIncompatible)`
+    - Expected validation status: `Invalid`
+
+5. **Claim-agnostic cryptographic verification**
+    - Input: same proof bytes, different non-cryptographic claim payload values
+    - Expected behavior: identical verification outcome; proof verification does not interpret statement business semantics
 
 ## Troubleshooting
 

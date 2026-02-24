@@ -1,4 +1,10 @@
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
+using Sigil.Sdk.Proof;
+using Sigil.Sdk.Registries;
+using Sigil.Sdk.Schema;
+using Sigil.Sdk.Statements;
+using Sigil.Sdk.Time;
 using Sigil.Sdk.Logging;
 using Sigil.Sdk.Validation;
 using Xunit;
@@ -34,6 +40,43 @@ public sealed class ValidationLoggingTests
         Assert.DoesNotContain("proofBytes", combined);
         Assert.DoesNotContain(fakeProofBytes, combined);
         Assert.DoesNotContain("{\"", combined); // crude guard against raw JSON blobs
+    }
+
+    [Fact]
+    public async Task Validator_DiagnosticsRedactProofMaterial_ForVerifierInternalError()
+    {
+        var fakeProofBytes = "VGhpcy1zaG91bGQtbm90LWxlYWstdmlhLWRpYWdub3N0aWNz";
+        var schemaValidator = new AlwaysValidSchemaValidator();
+        var verifier = new ThrowingVerifier(fakeProofBytes);
+        var statementHandler = new AlwaysValidStatementHandler();
+
+        var proofRegistry = new ImmutableProofSystemRegistry(
+            new[] { new KeyValuePair<string, IProofSystemVerifier>("midnight-zk-v1", verifier) });
+        var statementRegistry = new ImmutableStatementRegistry(
+            new[] { new KeyValuePair<string, IStatementHandler>(StatementIds.LicenseV1, statementHandler) });
+
+        var validator = new LicenseValidator(
+            schemaValidator,
+            proofRegistry,
+            statementRegistry,
+            new FixedClock(DateTimeOffset.UnixEpoch),
+            new ValidationOptions { EnableDiagnostics = true, LogFailureDetails = true });
+
+        var envelopeJson = "{" +
+                           "\"envelopeVersion\":\"1.0\"," +
+                           "\"proofSystem\":\"midnight-zk-v1\"," +
+                           "\"statementId\":\"urn:sigil:statement:license:v1\"," +
+                           "\"proofBytes\":\"AA==\"," +
+                           "\"publicInputs\":{\"subject\":\"x\"}" +
+                           "}";
+
+        var result = await validator.ValidateAsync(envelopeJson);
+
+        Assert.Equal(LicenseStatus.Error, result.Status);
+        Assert.Equal(LicenseFailureCode.ProofVerifierInternalError, result.Failure?.Code);
+        Assert.NotNull(result.Failure?.DiagnosticException);
+        Assert.DoesNotContain(fakeProofBytes, result.Failure!.DiagnosticException!.Message);
+        Assert.Equal("Validation internal error.", result.Failure.DiagnosticException.Message);
     }
 
     /// <summary>
@@ -186,5 +229,59 @@ public sealed class ValidationLoggingTests
             {
             }
         }
+    }
+
+    private sealed class AlwaysValidSchemaValidator : IProofEnvelopeSchemaValidator
+    {
+        public ProofEnvelopeSchemaValidationResult Validate(JsonElement envelopeRoot, bool diagnosticsEnabled)
+        {
+            return new ProofEnvelopeSchemaValidationResult(isValid: true, errorCount: 0);
+        }
+    }
+
+    private sealed class ThrowingVerifier : IProofSystemVerifier
+    {
+        private readonly string proofMaterial;
+
+        public ThrowingVerifier(string proofMaterial)
+        {
+            this.proofMaterial = proofMaterial;
+        }
+
+        public Task<ProofVerificationOutcome> VerifyAsync(
+            ReadOnlyMemory<byte> proofBytes,
+            ProofVerificationContext context,
+            CancellationToken cancellationToken = default)
+        {
+            throw new InvalidOperationException($"internal verifier fault: {proofMaterial}");
+        }
+    }
+
+    private sealed class AlwaysValidStatementHandler : IStatementHandler
+    {
+        public string StatementId => StatementIds.LicenseV1;
+
+        public Task<StatementValidationResult> ValidateAsync(JsonElement publicInputs, CancellationToken cancellationToken = default)
+        {
+            var claims = new LicenseClaims(
+                productId: "product",
+                edition: "edition",
+                features: new[] { "feature-a" },
+                expiresAt: 60 * 60 * 24 * 365,
+                maxSeats: 1,
+                issuedAt: 1);
+
+            return Task.FromResult(new StatementValidationResult(isValid: true, claims: claims));
+        }
+    }
+
+    private sealed class FixedClock : IClock
+    {
+        public FixedClock(DateTimeOffset utcNow)
+        {
+            UtcNow = utcNow;
+        }
+
+        public DateTimeOffset UtcNow { get; }
     }
 }
