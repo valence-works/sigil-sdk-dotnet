@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Sigil.Sdk.Envelope;
 using Sigil.Sdk.Logging;
+using Sigil.Sdk.Proof;
 using Sigil.Sdk.Registries;
 using Sigil.Sdk.Schema;
 using Sigil.Sdk.Time;
@@ -140,14 +141,41 @@ public sealed class LicenseValidator : ILicenseValidator
             }
 
             // Stage 5: Cryptographic verification.
-            var verified = await verifier
-                .VerifyAsync(readResult.StatementId, publicInputs, proofBytes, cancellationToken)
-                .ConfigureAwait(false);
+            var verificationContext = new ProofVerificationContext(readResult.StatementId, publicInputs);
 
-            if (!verified)
+            ProofVerificationOutcome verificationOutcome;
+            try
+            {
+                verificationOutcome = await verifier
+                    .VerifyAsync(proofBytes, verificationContext, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                verificationOutcome = ProofVerificationOutcome.VerifierError(
+                    LicenseFailureCode.ProofVerifierInternalError,
+                    ex);
+            }
+
+            if (verificationOutcome.Kind == ProofVerificationResultKind.InvalidProof)
             {
                 // Spec 002 (FR-008a): never return Expired if crypto fails.
-                return Fail(LicenseFailureCode.ProofVerificationFailed, readResult, diagnosticException: null);
+                return Fail(
+                    verificationOutcome.FailureCode ?? LicenseFailureCode.ProofVerificationFailed,
+                    readResult,
+                    diagnosticException: null);
+            }
+
+            if (verificationOutcome.Kind == ProofVerificationResultKind.VerifierError)
+            {
+                return Fail(
+                    verificationOutcome.FailureCode ?? LicenseFailureCode.ProofVerifierInternalError,
+                    readResult,
+                    verificationOutcome.DiagnosticException);
             }
 
             // Stage 6: Statement semantic validation.

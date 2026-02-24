@@ -83,13 +83,15 @@ As a security reviewer, I want proof verification to preserve first-failing-stag
 - **FR-010**: A cryptographic verification failure for a supported proof system MUST map to status `Invalid` and MUST NOT map to `Expired` or `Unsupported`.
 - **FR-010a**: For a supported proof system, incompatibility between `proofBytes` and statement-provided verification context MUST map to status `Invalid` with a deterministic failure code.
 - **FR-011**: Internal verifier execution errors (for example, unexpected runtime faults) MUST map to status `Error` with deterministic error classification.
+- **FR-011b**: Internal verifier execution errors MUST map to deterministic failure code `PROOF_VERIFIER_INTERNAL_ERROR` and status `Error`.
 - **FR-011a**: Cancellation during proof verification MUST be propagated as cancellation to the caller and MUST NOT be remapped to validation statuses (`Invalid`, `Unsupported`, `Malformed`, `Expired`, or `Error`).
 - **FR-012**: Pipeline stage precedence MUST follow “first failing stage wins” as defined in Spec 002.
 - **FR-013**: Proof verification MUST NOT override earlier schema, envelope-version, proof-system, or statement-resolution failures.
 - **FR-014**: The validator MUST fail closed: it MUST return `Valid` only when all required stages, including proof verification, succeed.
 
 - **FR-015**: The SDK MUST never log, emit, or include raw `proofBytes` in logs, exceptions, diagnostics, or returned error detail fields.
-- **FR-016**: If diagnostics are enabled, they MUST redact proof material and only expose minimal metadata required for deterministic troubleshooting.
+- **FR-016**: If diagnostics are enabled, only the following metadata MAY be emitted: `proofSystem`, `statementId`, `envelopeVersion`, `pipelineStage`, `failureCode`, `correlationId`, and `elapsedMs`.
+- **FR-016a**: Diagnostics MUST NOT emit raw `proofBytes`, derived proof material, raw verification context payload values, or exception payload dumps.
 - **FR-017**: Verification output from this contract MUST be limited to verification success/failure and deterministic failure classification; semantic claim interpretation MUST remain outside proof-system verifiers.
 
 - **FR-018**: The initial built-in proof-system support for this feature MUST cover `midnight-zk-v1`.
@@ -130,4 +132,5 @@ As a security reviewer, I want proof verification to preserve first-failing-stag
 - **SC-004**: 100% of internal verifier runtime faults return `Error` and preserve first-failing-stage semantics.
 - **SC-005**: 0 logs, diagnostics, exception messages, or returned error details contain raw `proofBytes` during acceptance testing.
 - **SC-006**: For envelopes up to 10 KB, end-to-end SDK validation (including proof verification) completes within 1 second at p95 in offline conformance benchmarks.
+- **SC-006a**: SC-006 measurement MUST use at least 100 measured runs after 10 warm-up runs, with fixed host profile and fixed immutable registry configuration.
 - **SC-007**: A second proof system can be added through DI registration and pass full conformance scenarios without requiring changes to existing statement definitions.

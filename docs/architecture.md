@@ -249,6 +249,15 @@ The SDK supports multiple .NET hosting models:
 
 All scenarios use identical registration pattern with optional configuration lambda.
 
+### Proof System Verifier Contract (Spec 005)
+
+- The SDK resolves proof-system verifiers from an immutable DI registry with canonical, case-sensitive identifiers.
+- `midnight-zk-v1` is registered by default as the initial built-in proof-system verifier.
+- Proof verification uses typed context and typed outcome contracts to preserve deterministic status/failure mapping.
+- Cancellation propagates to the caller and is not remapped to validation statuses.
+- Proof-stage failures remain fail-closed and first-failing-stage semantics are preserved throughout the validation pipeline.
+- Logging and diagnostics are redaction-safe: raw proof material is never emitted.
+
 ### Security Considerations
 
 1. **No Proof Bytes in Logs**: SDK enforces constitution constraint that `proofBytes` never appear in logs or error messages

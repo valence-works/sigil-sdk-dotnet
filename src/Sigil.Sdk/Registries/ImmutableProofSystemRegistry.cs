@@ -18,6 +18,16 @@ public sealed class ImmutableProofSystemRegistry : IProofSystemRegistry
         var dict = new Dictionary<string, IProofSystemVerifier>(StringComparer.Ordinal);
         foreach (var kvp in verifiers)
         {
+            if (string.IsNullOrWhiteSpace(kvp.Key))
+            {
+                throw new ArgumentException("Proof system registry key cannot be null or whitespace.", nameof(verifiers));
+            }
+
+            if (kvp.Value is null)
+            {
+                throw new ArgumentException($"Proof system verifier for key '{kvp.Key}' cannot be null.", nameof(verifiers));
+            }
+
             if (!dict.TryAdd(kvp.Key, kvp.Value))
             {
                 throw new ArgumentException($"Duplicate proofSystem registry key '{kvp.Key}'.", nameof(verifiers));
@@ -29,6 +39,12 @@ public sealed class ImmutableProofSystemRegistry : IProofSystemRegistry
 
     public bool TryGetVerifier(string proofSystem, out IProofSystemVerifier verifier)
     {
+        if (string.IsNullOrWhiteSpace(proofSystem))
+        {
+            verifier = null!;
+            return false;
+        }
+
         return verifiers.TryGetValue(proofSystem, out verifier!);
     }
 

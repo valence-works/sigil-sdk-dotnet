@@ -261,13 +261,14 @@ public sealed class LicenseValidatorTests
             this.verifyResult = verifyResult;
         }
 
-        public Task<bool> VerifyAsync(
-            string statementId,
-            JsonElement publicInputs,
+        public Task<ProofVerificationOutcome> VerifyAsync(
             ReadOnlyMemory<byte> proofBytes,
+            ProofVerificationContext context,
             CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(verifyResult);
+            return Task.FromResult(verifyResult
+                ? ProofVerificationOutcome.Verified()
+                : ProofVerificationOutcome.Invalid());
         }
     }
 
@@ -302,14 +303,15 @@ public sealed class LicenseValidatorTests
 
         public int CallCount { get; private set; }
 
-        public Task<bool> VerifyAsync(
-            string statementId,
-            JsonElement publicInputs,
+        public Task<ProofVerificationOutcome> VerifyAsync(
             ReadOnlyMemory<byte> proofBytes,
+            ProofVerificationContext context,
             CancellationToken cancellationToken = default)
         {
             CallCount++;
-            return Task.FromResult(verifyResult);
+            return Task.FromResult(verifyResult
+                ? ProofVerificationOutcome.Verified()
+                : ProofVerificationOutcome.Invalid());
         }
     }
 

@@ -8,7 +8,9 @@ public static class ValidationPipeline
     public const string EarlyExtract = "extract.identifiers";
     public const string Schema = "schema";
     public const string RegistryResolution = "registry";
+    public const string ProofContextPreparation = "proof.context";
     public const string ProofVerification = "crypto";
+    public const string ProofOutcomeMapping = "proof.result";
     public const string StatementValidation = "semantic"; // Statement handler validation using public inputs.
     public const string ExpiryEvaluation = "expiry"; // Expiry check using validated claim values.
     public const string InternalError = "error";

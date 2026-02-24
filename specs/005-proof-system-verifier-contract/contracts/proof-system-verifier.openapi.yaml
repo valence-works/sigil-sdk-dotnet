@@ -5,6 +5,8 @@ info:
   description: |
     Verification-only contract for proof-system verification behavior in the Sigil SDK.
     This contract captures deterministic status mappings and fail-closed pipeline semantics.
+    This OpenAPI artifact is illustrative for behavioral mapping and conformance documentation;
+    the runtime SDK contract is library/API-based, not HTTP-bound.
 servers:
   - url: https://sdk.local
 paths:
@@ -36,6 +38,10 @@ paths:
                   value:
                     status: Invalid
                     failureCode: PROOF_VERIFICATION_FAILED
+                contextIncompatible:
+                  value:
+                    status: Invalid
+                    failureCode: PROOF_VERIFICATION_CONTEXT_INCOMPATIBLE
                 unsupportedProofSystem:
                   value:
                     status: Unsupported
@@ -44,8 +50,6 @@ paths:
                   value:
                     status: Error
                     failureCode: PROOF_VERIFIER_INTERNAL_ERROR
-        '499':
-          description: Request cancelled by caller; no validation status mapping is produced.
       x-stage-precedence:
         - schema
         - routing
@@ -53,6 +57,7 @@ paths:
         - statement
         - expiry
       x-first-failing-stage-wins: true
+      x-cancellation-behavior: caller-cancellation-propagates-no-status-mapping
 components:
   schemas:
     ValidationRequest:
@@ -110,6 +115,14 @@ x-sigil-policy:
   offlineOnly: true
   deterministicForIdenticalInputs: true
   noProofBytesInLogs: true
+  allowedDiagnosticMetadataFields:
+    - proofSystem
+    - statementId
+    - envelopeVersion
+    - pipelineStage
+    - failureCode
+    - correlationId
+    - elapsedMs
   initialSupportedProofSystems:
     - midnight-zk-v1
   futureProofSystemExtensibility: di-registered-verifier

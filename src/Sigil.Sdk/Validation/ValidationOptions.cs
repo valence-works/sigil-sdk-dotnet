@@ -29,6 +29,9 @@ public sealed class ValidationOptions
     private readonly Dictionary<string, IProofSystemVerifier> proofSystems = new(StringComparer.Ordinal);
     private readonly Dictionary<string, IStatementHandler> statementHandlers = new(StringComparer.Ordinal);
 
+    public static readonly IReadOnlyList<string> AllowedDiagnosticFields =
+        new[] { "proofSystem", "statementId", "envelopeVersion", "pipelineStage", "failureCode", "correlationId", "elapsedMs" };
+
     /// <summary>
     /// Gets or sets whether diagnostics are enabled during validation.
     /// Default: false (Spec 003 FR-010 - secure defaults).
@@ -95,6 +98,11 @@ public sealed class ValidationOptions
         }
 
         return this;
+    }
+
+    public ValidationOptions AddMidnightZkV1ProofSystem()
+    {
+        return AddProofSystem(ProofSystemIds.MidnightZkV1, new MidnightZkV1ProofSystemVerifier());
     }
 
     /// <summary>

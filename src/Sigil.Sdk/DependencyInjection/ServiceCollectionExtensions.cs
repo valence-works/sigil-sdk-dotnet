@@ -129,6 +129,7 @@ public static class ServiceCollectionExtensions
 
             // Create and configure options
             var options = new ValidationOptions();
+            options.AddMidnightZkV1ProofSystem();
             options.AddStatementHandler(new LicenseV1StatementHandler());
             configureOptions?.Invoke(options);
 

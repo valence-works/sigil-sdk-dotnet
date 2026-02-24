@@ -39,12 +39,11 @@ public static class ValidationLogging
             }
             else if (shouldLogDetails && result.Failure != null)
             {
-                // Log with failure details (when enabled)
+                // Log detail-safe metadata only (Spec 005 FR-016/FR-016a).
                 logger.LogWarning(
-                    "Sigil validation failed: {LicenseStatus} {FailureCode} {FailureMessage} {EnvelopeVersion} {StatementId} {ProofSystem}",
+                    "Sigil validation failed: {LicenseStatus} {FailureCode} {EnvelopeVersion} {StatementId} {ProofSystem}",
                     result.Status,
                     result.Failure.Code,
-                    SanitizeFailureMessage(result.Failure.Message),
                     result.EnvelopeVersion,
                     result.StatementId,
                     result.ProofSystem);

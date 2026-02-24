@@ -93,6 +93,15 @@ No constitution violations.
 - [specs/005-proof-system-verifier-contract/contracts/proof-system-verifier.openapi.yaml](contracts/proof-system-verifier.openapi.yaml)
 - [specs/005-proof-system-verifier-contract/quickstart.md](quickstart.md)
 
+## Implementation Checklist Anchors
+
+- Setup complete: `T001`-`T003`
+- Foundational complete: `T004`-`T009`
+- MVP (US1) complete: `T010`-`T015`
+- US2 complete: `T016`-`T020`
+- US3 complete: `T021`-`T025`
+- Polish complete: `T026`-`T031`
+
 ## Constitution Check (Post-Design)
 
 - Schema validation before proof verification: **PASS**
