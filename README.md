@@ -36,6 +36,20 @@ var result = await validator.ValidateAsync(envelopeJson);
 dotnet add package Sigil.Sdk
 ```
 
+## Envelope CLI
+
+Use the local CLI to validate a proof envelope file from platform or gateway smoke tests:
+
+```bash
+dotnet run --project tools/Sigil.Sdk.Cli -- verify-envelope /path/to/license-envelope.json
+```
+
+The command prints a JSON validation result and exits with:
+
+- `0` when the envelope is valid.
+- `1` when the envelope was read but failed validation.
+- `2` for usage or file access errors.
+
 ## Specifications
 
 This project is specification-driven. See [specs/](specs/) for detailed specifications.
